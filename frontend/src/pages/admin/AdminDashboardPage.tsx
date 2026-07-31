@@ -42,10 +42,10 @@ export default function AdminDashboardPage() {
       <p className="mt-1 text-sm text-slate-500">Overview of packages, tests and bookings.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={PackageIcon} label="Total Packages" value={stats.total_packages} />
-        <StatCard icon={FlaskConical} label="Total Tests" value={stats.total_tests} />
-        <StatCard icon={ClipboardList} label="Total Bookings" value={stats.total_bookings} />
-        <StatCard icon={Sparkles} label="New Bookings" value={stats.new_bookings} />
+        <StatCard icon={PackageIcon} label="Total Packages" value={stats.total_packages} color="primary" />
+        <StatCard icon={FlaskConical} label="Total Tests" value={stats.total_tests} color="accent" />
+        <StatCard icon={ClipboardList} label="Total Bookings" value={stats.total_bookings} color="slate" />
+        <StatCard icon={Sparkles} label="New Bookings" value={stats.new_bookings} color="gold" />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
@@ -68,7 +68,12 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="card p-5 lg:col-span-2">
-          <h2 className="text-sm font-semibold text-slate-900">Recent Bookings</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-900">Recent Bookings</h2>
+            <Link to="/admin/bookings" className="text-xs font-semibold text-primary-700 hover:text-primary-800">
+              View All &rarr;
+            </Link>
+          </div>
           {stats.recent_bookings.length === 0 ? (
             <EmptyState title="No bookings yet" description="New bookings will appear here as customers submit them." />
           ) : (
