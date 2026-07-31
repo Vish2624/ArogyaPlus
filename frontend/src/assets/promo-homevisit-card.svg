@@ -1,0 +1,46 @@
+<svg width="900" height="700" viewBox="0 0 900 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d4030" />
+      <stop offset="100%" stop-color="#1c8a5e" />
+    </linearGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffb020" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#ffb020" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="900" height="700" fill="url(#bg)" />
+  <circle cx="760" cy="580" r="240" fill="url(#glow1)" />
+  <circle cx="160" cy="150" r="220" fill="url(#glow2)" />
+
+  <g opacity="0.08" stroke="#ffffff" stroke-width="1.5">
+    <line x1="0" y1="100" x2="900" y2="100" />
+    <line x1="0" y1="220" x2="900" y2="220" />
+    <line x1="0" y1="340" x2="900" y2="340" />
+    <line x1="0" y1="460" x2="900" y2="460" />
+    <line x1="0" y1="580" x2="900" y2="580" />
+    <line x1="150" y1="0" x2="150" y2="700" />
+    <line x1="350" y1="0" x2="350" y2="700" />
+    <line x1="550" y1="0" x2="550" y2="700" />
+    <line x1="750" y1="0" x2="750" y2="700" />
+  </g>
+
+  <g transform="translate(450,320)" fill="#ffffff">
+    <circle r="108" opacity="0.1" />
+    <circle r="80" opacity="0.14" />
+    <path d="M -50 10 L 0 -38 L 50 10 L 50 55 L -50 55 Z" opacity="0.95" />
+    <rect x="-14" y="14" width="28" height="41" rx="3" fill="#0d4030" />
+  </g>
+
+  <text x="450" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff" opacity="0.92">
+    Home Visit Photo
+  </text>
+  <text x="450" y="494" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" opacity="0.65">
+    Replace this file to update the promo card image
+  </text>
+</svg>
