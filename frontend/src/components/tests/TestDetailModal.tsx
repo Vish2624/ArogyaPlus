@@ -19,7 +19,33 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
   if (!test) return null;
 
   return (
-    <Modal open={Boolean(test)} onClose={onClose} title={test.name} maxWidthClassName="max-w-xl">
+    <Modal
+      open={Boolean(test)}
+      onClose={onClose}
+      title={test.name}
+      maxWidthClassName="max-w-xl"
+      footer={
+        <button
+          type="button"
+          disabled={inCart}
+          onClick={() => {
+            addItem({
+              type: "test",
+              id: test.id,
+              name: test.name,
+              category: test.category,
+              labPrice: test.lab_price,
+              homePrice: test.home_price,
+            });
+            showToast(`${test.name} added to cart`);
+            onClose();
+          }}
+          className="btn-primary w-full"
+        >
+          {inCart ? "Already in Cart" : "Add to Cart"}
+        </button>
+      }
+    >
       {test.description && <p className="text-sm text-slate-600">{test.description}</p>}
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
@@ -67,26 +93,6 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
           <p className="mt-2 text-sm text-slate-500">No parameters listed for this test.</p>
         )}
       </div>
-
-      <button
-        type="button"
-        disabled={inCart}
-        onClick={() => {
-          addItem({
-            type: "test",
-            id: test.id,
-            name: test.name,
-            category: test.category,
-            labPrice: test.lab_price,
-            homePrice: test.home_price,
-          });
-          showToast(`${test.name} added to cart`);
-          onClose();
-        }}
-        className="btn-primary mt-6 w-full"
-      >
-        {inCart ? "Already in Cart" : "Add to Cart"}
-      </button>
     </Modal>
   );
 }

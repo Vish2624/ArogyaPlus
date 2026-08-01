@@ -7,13 +7,15 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  /** Rendered pinned below the scrollable body (e.g. a primary CTA) instead of scrolling with it. */
+  footer?: ReactNode;
   maxWidthClassName?: string;
 }
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export default function Modal({ open, onClose, title, children, maxWidthClassName = "max-w-lg" }: ModalProps) {
+export default function Modal({ open, onClose, title, children, footer, maxWidthClassName = "max-w-lg" }: ModalProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
@@ -74,7 +76,7 @@ export default function Modal({ open, onClose, title, children, maxWidthClassNam
         tabIndex={-1}
         className={`relative flex w-full ${maxWidthClassName} max-h-[85vh] flex-col overflow-hidden rounded-2xl bg-white shadow-elevated focus:outline-none`}
       >
-        <div className="min-h-0 overflow-y-auto p-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
           <div className="mb-4 flex items-start justify-between gap-4">
             <h3 id={titleId} className="text-lg font-semibold text-slate-900">{title}</h3>
             <button
@@ -88,6 +90,7 @@ export default function Modal({ open, onClose, title, children, maxWidthClassNam
           </div>
           {children}
         </div>
+        {footer && <div className="shrink-0 border-t border-slate-100 p-6 pt-4">{footer}</div>}
       </div>
     </div>
   );

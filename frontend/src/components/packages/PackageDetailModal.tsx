@@ -21,7 +21,33 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
   if (!pkg) return null;
 
   return (
-    <Modal open={Boolean(pkg)} onClose={onClose} title={pkg.name} maxWidthClassName="max-w-xl">
+    <Modal
+      open={Boolean(pkg)}
+      onClose={onClose}
+      title={pkg.name}
+      maxWidthClassName="max-w-xl"
+      footer={
+        <button
+          type="button"
+          disabled={inCart}
+          onClick={() => {
+            addItem({
+              type: "package",
+              id: pkg.id,
+              name: pkg.name,
+              category: pkg.category,
+              labPrice: pkg.lab_price,
+              homePrice: pkg.home_price,
+            });
+            showToast(`${pkg.name} added to cart`);
+            onClose();
+          }}
+          className="btn-primary w-full"
+        >
+          {inCart ? "Already in Cart" : "Add to Cart"}
+        </button>
+      }
+    >
       {pkg.description && <p className="text-sm text-slate-600">{pkg.description}</p>}
 
       {pkg.tat && (
@@ -98,26 +124,6 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
           })}
         </ul>
       </div>
-
-      <button
-        type="button"
-        disabled={inCart}
-        onClick={() => {
-          addItem({
-            type: "package",
-            id: pkg.id,
-            name: pkg.name,
-            category: pkg.category,
-            labPrice: pkg.lab_price,
-            homePrice: pkg.home_price,
-          });
-          showToast(`${pkg.name} added to cart`);
-          onClose();
-        }}
-        className="btn-primary mt-6 w-full"
-      >
-        {inCart ? "Already in Cart" : "Add to Cart"}
-      </button>
     </Modal>
   );
 }
