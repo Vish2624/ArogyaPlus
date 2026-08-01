@@ -59,7 +59,7 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
 
       <div className="container-page relative pb-16 pt-10 sm:pb-20 sm:pt-14 lg:pt-16">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
-          <div className="flex flex-col justify-center">
+          <div className="order-2 flex flex-col justify-center lg:order-1">
             <div key={`text-${slide}`} className="hero-slide-fade will-change-transform">
               {!banner ? (
                 <>
@@ -120,7 +120,7 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
             </div>
           </div>
 
-          <div key={`visual-${slide}`} className={`hero-slide-fade relative will-change-transform ${SLIDE_HEIGHT}`}>
+          <div key={`visual-${slide}`} className={`hero-slide-fade relative order-1 will-change-transform lg:order-2 ${SLIDE_HEIGHT}`}>
             {!banner ? (
               featuredPackage && (
                 <>
@@ -233,29 +233,33 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
             <button
               type="button"
               onClick={() => goTo(slide - 1)}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-white/20"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white backdrop-blur-md transition-colors hover:bg-white/25"
               aria-label="Previous slide"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center">
               {Array.from({ length: slideCount }).map((_, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => goTo(i)}
                   aria-label={`Go to slide ${i + 1}`}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${i === slide ? "w-5 bg-white" : "w-1.5 bg-white/50"}`}
-                />
+                  className="flex items-center justify-center p-2"
+                >
+                  <span
+                    className={`block h-1.5 rounded-full transition-all duration-300 ${i === slide ? "w-5 bg-white" : "w-1.5 bg-white/50"}`}
+                  />
+                </button>
               ))}
             </div>
             <button
               type="button"
               onClick={() => goTo(slide + 1)}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-white/20"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white backdrop-blur-md transition-colors hover:bg-white/25"
               aria-label="Next slide"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         )}

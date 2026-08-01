@@ -64,7 +64,7 @@ export default function QuickSearchBar({ compact = false }: QuickSearchBarProps)
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2.5 rounded-card border border-white/30 bg-white/15 p-3 shadow-glass backdrop-blur-2xl ring-1 ring-white/25 sm:flex-row sm:items-center sm:p-3.5"
+      className="flex flex-col gap-3 rounded-card border border-white/10 bg-white/5 p-3 shadow-glass backdrop-blur-2xl sm:flex-row sm:items-center sm:p-3.5"
     >
       <SearchAutocomplete
         value={query}
@@ -73,11 +73,11 @@ export default function QuickSearchBar({ compact = false }: QuickSearchBarProps)
         onSelect={handleSelectSuggestion}
         placeholder="Search health packages, blood tests, vitamins..."
         className="flex-1"
-        inputClassName="h-[58px] w-full rounded-input border border-white/25 bg-white/10 pl-11 pr-3 text-sm text-white placeholder:text-white/60 backdrop-blur-md focus:border-white/50 focus:outline-none focus:ring-1 focus:ring-white/50"
+        inputClassName="h-[58px] w-full rounded-input border border-white/40 bg-primary-950/40 pl-11 pr-3 text-sm text-white placeholder:text-white/60 shadow-lg shadow-black/10 backdrop-blur-md focus:border-white/70 focus:outline-none focus:ring-1 focus:ring-white/70"
         iconClassName="left-4 h-5 w-5 text-white/70"
         emptyLabel="No matches. Try a different spelling."
       />
-      <div className="grid grid-cols-2 gap-2.5 sm:flex">
+      <div className="grid grid-cols-2 gap-3 sm:flex">
         <button
           type="button"
           onClick={() => goTo("/packages")}

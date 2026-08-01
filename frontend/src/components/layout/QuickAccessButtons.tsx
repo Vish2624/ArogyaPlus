@@ -47,7 +47,7 @@ export default function QuickAccessButtons() {
 
   return (
     <div
-      className={`fixed right-5 top-[62%] z-40 flex -translate-y-1/2 flex-col items-center gap-2 rounded-[20px] bg-white/92 p-2 shadow-glass ring-1 ring-slate-100 backdrop-blur-md transition-opacity duration-300 ${
+      className={`fixed bottom-8 right-5 z-40 hidden flex-col items-center gap-2 rounded-[20px] bg-white/92 p-2 shadow-glass ring-1 ring-slate-100 backdrop-blur-md transition-opacity duration-300 sm:flex ${
         visible ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
       aria-hidden={!visible}

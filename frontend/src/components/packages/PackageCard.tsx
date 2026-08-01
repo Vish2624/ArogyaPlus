@@ -26,34 +26,34 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
 
   return (
     <div
-      className={`card relative flex h-full flex-col p-5 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40 ${pkg.is_featured ? "ring-2 ring-primary-500" : ""}`}
+      className={`card relative flex h-full flex-col p-4 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40 sm:p-5 ${pkg.is_featured ? "ring-2 ring-primary-500" : ""}`}
     >
       {pkg.is_featured && (
-        <span className="absolute right-4 top-0 -translate-y-1/2 rounded-full bg-primary-600 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+        <span className="absolute right-4 top-0 -translate-y-1/2 rounded-full bg-primary-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white sm:px-3 sm:text-[11px]">
           Most Popular
         </span>
       )}
-      <div className="mb-3 flex items-center gap-2.5">
+      <div className="mb-2.5 flex items-center gap-2 sm:mb-3 sm:gap-2.5">
         {pkg.image_url ? (
-          <span className="flex h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200">
+          <span className="flex h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200 sm:h-9 sm:w-9">
             <img src={pkg.image_url} alt="" className="h-full w-full object-cover" />
           </span>
         ) : (
-          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${style.bg} ${style.text}`}>
-            <Icon className="h-4 w-4" aria-hidden="true" />
+          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.bg} ${style.text} sm:h-9 sm:w-9`}>
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
           </span>
         )}
         {pkg.category && <span className={`badge w-fit ${style.bg} ${style.text}`}>{pkg.category}</span>}
       </div>
-      <h3 className="line-clamp-1 text-lg font-bold text-slate-900">{pkg.name}</h3>
-      {pkg.description && <p className="mt-1.5 line-clamp-2 text-sm leading-6 text-slate-500">{pkg.description}</p>}
+      <h3 className="line-clamp-1 text-base font-bold text-slate-900 sm:text-lg">{pkg.name}</h3>
+      {pkg.description && <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-500 sm:text-sm sm:leading-6">{pkg.description}</p>}
 
-      <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+      <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 sm:mt-2.5">
         <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" aria-hidden="true" />
         {pkg.tests.length} tests included
       </div>
 
-      <ul className="custom-scrollbar mt-2.5 max-h-28 flex-1 space-y-1.5 overflow-y-auto border-t border-slate-100 pr-2 pt-2.5 text-xs text-slate-600">
+      <ul className="custom-scrollbar mt-2 max-h-24 flex-1 space-y-1 overflow-y-auto border-t border-slate-100 pr-2 pt-2 text-xs text-slate-600 sm:mt-2.5 sm:max-h-28 sm:space-y-1.5 sm:pt-2.5">
         {pkg.tests.map((test) => (
           <li key={test.id} className="flex items-start gap-2">
             <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-primary-500" aria-hidden="true" />
@@ -67,24 +67,24 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
         </p>
       )}
 
-      <div className="mt-3 grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+      <div className="mt-2.5 grid grid-cols-2 gap-2.5 border-t border-slate-100 pt-2.5 sm:mt-3 sm:gap-3 sm:pt-3">
         <div>
-          <p className="text-xs text-slate-500">Lab Visit</p>
+          <p className="text-[11px] text-slate-500 sm:text-xs">Lab Visit</p>
           <p className="text-slate-900">
-            <span className="text-xs font-semibold text-slate-500">{labPrice.currency}</span>{" "}
-            <span className="text-lg font-extrabold">{labPrice.amount}</span>
+            <span className="text-[11px] font-semibold text-slate-500 sm:text-xs">{labPrice.currency}</span>{" "}
+            <span className="text-base font-extrabold sm:text-lg">{labPrice.amount}</span>
           </p>
         </div>
         <div>
-          <p className="text-xs text-slate-500">Home Visit</p>
+          <p className="text-[11px] text-slate-500 sm:text-xs">Home Visit</p>
           <p className="text-slate-900">
-            <span className="text-xs font-semibold text-slate-500">{homePrice.currency}</span>{" "}
-            <span className="text-lg font-extrabold">{homePrice.amount}</span>
+            <span className="text-[11px] font-semibold text-slate-500 sm:text-xs">{homePrice.currency}</span>{" "}
+            <span className="text-base font-extrabold sm:text-lg">{homePrice.amount}</span>
           </p>
         </div>
       </div>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-3 flex gap-2 sm:mt-4">
         <button type="button" onClick={() => onViewDetails(pkg)} className="btn-secondary flex-1 !px-3 !py-2 !text-xs">
           <Eye className="h-3.5 w-3.5" aria-hidden="true" />
           Details

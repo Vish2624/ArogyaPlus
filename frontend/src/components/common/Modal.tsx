@@ -78,7 +78,7 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
       >
         <div className="min-h-0 flex-1 overflow-y-auto p-6">
           <div className="mb-4 flex items-start justify-between gap-4">
-            <h3 id={titleId} className="text-lg font-semibold text-slate-900">{title}</h3>
+            <h3 id={titleId} className="font-display text-xl font-bold tracking-tight text-slate-900">{title}</h3>
             <button
               type="button"
               onClick={onClose}

@@ -2,9 +2,9 @@ export const APP_NAME = "ArogyaPlus";
 
 export const CONTACT = {
   phone: "+971 4 123 4567",
-  whatsapp: "+971 50 123 4567",
-  whatsappLink: "https://wa.me/971501234567",
-  email: "care@arogyaplus.ae",
+  whatsapp: "+971 58 580 2248",
+  whatsappLink: "https://wa.me/971585802248",
+  email: "support@arogyaplus.com",
   address: "Al Wasl Road, Jumeirah, Dubai, United Arab Emirates",
 };
 

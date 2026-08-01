@@ -49,17 +49,20 @@ export default function BookingPage() {
         <div className="mt-10 grid gap-8 lg:grid-cols-5 lg:items-start">
           <div className="card h-fit p-6 lg:sticky lg:top-24 lg:col-span-2">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
                 <ShoppingBag className="h-4 w-4" aria-hidden="true" />
               </span>
               <h2 className="text-base font-semibold text-slate-900">Your Cart ({items.length})</h2>
             </div>
-            <div className="mt-2">
+            <div className="mt-3">
               <CartList />
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
               <span className="text-sm font-semibold text-slate-700">Total</span>
-              <span className="text-lg font-bold text-primary-700">{formatCurrency(total)}</span>
+              <span className="text-primary-700">
+                <span className="text-sm font-semibold">{formatCurrency(total).split(" ")[0]}</span>{" "}
+                <span className="text-xl font-extrabold">{formatCurrency(total).split(" ")[1]}</span>
+              </span>
             </div>
           </div>
 

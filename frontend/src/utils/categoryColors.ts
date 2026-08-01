@@ -6,7 +6,7 @@ interface CategoryStyle {
 const RULES: [RegExp, CategoryStyle][] = [
   [/diabetes|sugar|hba1c/i, { bg: "bg-blue-50", text: "text-blue-700" }],
   [/hormone|thyroid/i, { bg: "bg-purple-50", text: "text-purple-700" }],
-  [/biochemistry/i, { bg: "bg-accent-50", text: "text-accent-700" }],
+  [/biochemistry/i, { bg: "bg-violet-50", text: "text-violet-700" }],
   [/heart|cardio|essential/i, { bg: "bg-red-50", text: "text-red-700" }],
   [/vitamin|nutrition/i, { bg: "bg-amber-50", text: "text-amber-700" }],
   [/kidney|renal/i, { bg: "bg-primary-50", text: "text-primary-700" }],

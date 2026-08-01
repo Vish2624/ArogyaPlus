@@ -1,4 +1,4 @@
-import { Clock, Droplet } from "lucide-react";
+import { CheckCircle2, Clock, Droplet } from "lucide-react";
 
 import Modal from "@/components/common/Modal";
 import { useCartStore } from "@/store/cartStore";
@@ -79,10 +79,18 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
         {test.parameters.length > 0 ? (
           <ul className="custom-scrollbar mt-2 max-h-56 space-y-2 overflow-y-auto pr-1">
             {test.parameters.map((parameter) => (
-              <li key={parameter.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
-                <span className="font-medium text-slate-700">{parameter.name}</span>
+              <li
+                key={parameter.id}
+                className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm transition-colors hover:border-primary-200"
+              >
+                <span className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-50 text-accent-600">
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  </span>
+                  <span className="font-bold text-slate-900">{parameter.name}</span>
+                </span>
                 {(parameter.unit || parameter.reference_range) && (
-                  <span className="shrink-0 text-xs text-slate-500">
+                  <span className="shrink-0 text-xs font-medium text-slate-500">
                     {[parameter.unit, parameter.reference_range].filter(Boolean).join(" · ")}
                   </span>
                 )}

@@ -70,22 +70,29 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
 
       <div className="mt-5">
         <h4 className="text-sm font-semibold text-slate-900">Included Tests ({pkg.tests.length})</h4>
-        <ul className="custom-scrollbar mt-2 max-h-72 space-y-1.5 overflow-y-auto pr-1">
+        <ul className="custom-scrollbar mt-2 max-h-72 space-y-2 overflow-y-auto pr-1">
           {pkg.tests.map((test) => {
             const isExpanded = expandedTestId === test.id;
             return (
-              <li key={test.id} className="rounded-lg border border-slate-100">
+              <li
+                key={test.id}
+                className={`overflow-hidden rounded-xl border transition-colors ${
+                  isExpanded ? "border-primary-200 bg-primary-50/30" : "border-slate-200 hover:border-primary-200"
+                }`}
+              >
                 <button
                   type="button"
                   onClick={() => setExpandedTestId(isExpanded ? null : test.id)}
                   aria-expanded={isExpanded}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 hover:bg-slate-50"
+                  className="flex w-full items-center justify-between gap-2 px-3.5 py-3 text-left hover:bg-primary-50/40"
                 >
-                  <span className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-accent-600" aria-hidden="true" />
-                    {test.name}
+                  <span className="flex items-center gap-2.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-50 text-accent-600">
+                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-bold text-slate-900">{test.name}</span>
                   </span>
-                  <span className="flex shrink-0 items-center gap-1.5 text-xs font-normal text-slate-500">
+                  <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-slate-500">
                     {test.parameters.length} parameter{test.parameters.length === 1 ? "" : "s"}
                     {isExpanded ? (
                       <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
@@ -95,7 +102,7 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
                   </span>
                 </button>
                 {isExpanded && (
-                  <div className="space-y-2 border-t border-slate-100 px-3 py-2">
+                  <div className="space-y-2 border-t border-primary-100 bg-white px-3.5 py-3">
                     {test.sample_type && (
                       <p className="text-xs text-slate-500">
                         Sample type: <span className="font-semibold text-slate-700">{test.sample_type}</span>
@@ -104,8 +111,8 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
                     {test.parameters.length > 0 ? (
                       <ul className="space-y-1">
                         {test.parameters.map((parameter) => (
-                          <li key={parameter.id} className="flex items-center justify-between gap-2 py-0.5 text-xs text-slate-600">
-                            <span>{parameter.name}</span>
+                          <li key={parameter.id} className="flex items-center justify-between gap-2 py-0.5 text-xs">
+                            <span className="font-semibold text-slate-800">{parameter.name}</span>
                             {(parameter.unit || parameter.reference_range) && (
                               <span className="shrink-0 text-slate-400">
                                 {[parameter.unit, parameter.reference_range].filter(Boolean).join(" · ")}

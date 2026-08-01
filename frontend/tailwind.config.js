@@ -17,18 +17,22 @@ export default {
           900: "#064e3b",
           950: "#022c22",
         },
+        // A genuinely distinct warm-gold hue (not another green) so "accent" elements —
+        // discount badges, featured ribbons, checkmarks — actually stand out against the
+        // primary emerald green instead of blending into it. Mirrors the `gold` scale, which
+        // was already validated in star ratings / the hero rating badge.
         accent: {
-          50: "#ecfdf5",
-          100: "#d1fae5",
-          200: "#a7f3d0",
-          300: "#6ee7b7",
-          400: "#34d399",
-          500: "#10b981",
-          600: "#047857",
-          700: "#065f46",
-          800: "#064e3b",
-          900: "#022c22",
-          950: "#011a15",
+          50: "#fffbeb",
+          100: "#fef3c7",
+          200: "#fde68a",
+          300: "#fcd34d",
+          400: "#fbbf24",
+          500: "#f59e0b",
+          600: "#d97706",
+          700: "#b45309",
+          800: "#92400e",
+          900: "#78350f",
+          950: "#451a03",
         },
         gold: {
           50: "#fffbeb",
@@ -50,7 +54,7 @@ export default {
       },
       fontSize: {
         hero: ["60px", { lineHeight: "1.08", letterSpacing: "-0.02em" }],
-        "page-title": ["44px", { lineHeight: "1.15", letterSpacing: "-0.01em" }],
+        "page-title": ["clamp(1.75rem, 5.5vw, 2.75rem)", { lineHeight: "1.15", letterSpacing: "-0.01em" }],
         "card-title": ["28px", { lineHeight: "1.25" }],
       },
       boxShadow: {

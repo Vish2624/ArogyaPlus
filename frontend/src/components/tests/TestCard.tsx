@@ -25,20 +25,20 @@ export default function TestCard({ test, onViewDetails }: TestCardProps) {
   const off = percentOff(test.lab_price, test.original_lab_price);
 
   return (
-    <div className="card flex flex-col p-5 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40">
-      <div className="mb-2.5 flex items-center gap-2.5">
+    <div className="card flex flex-col p-4 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40 sm:p-5">
+      <div className="mb-2 flex items-center gap-2 sm:mb-2.5 sm:gap-2.5">
         {test.image_url ? (
-          <span className="flex h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200">
+          <span className="flex h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200 sm:h-9 sm:w-9">
             <img src={test.image_url} alt="" className="h-full w-full object-cover" />
           </span>
         ) : (
-          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${style.bg} ${style.text}`}>
-            <Icon className="h-4 w-4" aria-hidden="true" />
+          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.bg} ${style.text} sm:h-9 sm:w-9`}>
+            <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
           </span>
         )}
         {test.category && <span className={`badge w-fit ${style.bg} ${style.text}`}>{test.category}</span>}
       </div>
-      <h3 className="text-base font-semibold text-slate-900">{test.name}</h3>
+      <h3 className="text-sm font-semibold text-slate-900 sm:text-base">{test.name}</h3>
       {test.tat && (
         <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary-700">
           <Clock className="h-3.5 w-3.5 text-primary-600" aria-hidden="true" />
@@ -46,7 +46,7 @@ export default function TestCard({ test, onViewDetails }: TestCardProps) {
         </p>
       )}
 
-      <div className="mt-3 grid grid-cols-2 gap-3 border-t border-slate-100 pt-2.5">
+      <div className="mt-2.5 grid grid-cols-2 gap-2.5 border-t border-slate-100 pt-2 sm:mt-3 sm:gap-3 sm:pt-2.5">
         <div>
           <div className="flex items-center gap-1.5">
             <p className="text-xs text-slate-500">Lab Visit</p>
