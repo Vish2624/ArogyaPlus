@@ -43,6 +43,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [paramSearch, setParamSearch] = useState("");
+  const [paramError, setParamError] = useState(false);
 
   const {
     register,
@@ -59,6 +60,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
     if (!open) return;
     setSubmitError(null);
     setParamSearch("");
+    setParamError(false);
     setSelectedIds(new Set(initialTest?.parameters.map((p) => p.id) ?? []));
     reset(
       initialTest
@@ -114,12 +116,18 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      if (next.size > 0) setParamError(false);
       return next;
     });
   };
 
   const submitHandler = async (values: TestFormValues) => {
     setSubmitError(null);
+    if (selectedIds.size === 0) {
+      setParamError(true);
+      return;
+    }
+    setParamError(false);
     try {
       await onSubmit(values, Array.from(selectedIds));
     } catch (error) {
@@ -191,7 +199,8 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
 
         <div>
           <label className="form-label">
-            Parameters Included {selectedIds.size > 0 && `(${selectedIds.size} selected)`}
+            Parameters Included <span className="text-red-500">*</span>{" "}
+            {selectedIds.size > 0 && <span className="font-normal text-slate-500">({selectedIds.size} selected)</span>}
           </label>
           <div className="relative mb-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
@@ -203,7 +212,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
               className="form-input pl-9"
             />
           </div>
-          <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2">
+          <div className={`max-h-48 space-y-1 overflow-y-auto rounded-lg border p-2 ${paramError ? "border-red-300" : "border-slate-200"}`}>
             {catalogLoading && <p className="px-2 py-3 text-center text-sm text-slate-500">Loading parameters...</p>}
             {!catalogLoading && filteredCatalog.length === 0 && (
               <p className="px-2 py-3 text-center text-sm text-slate-500">No parameters found.</p>
@@ -227,6 +236,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
                 </label>
               ))}
           </div>
+          {paramError && <p className="form-error">Select at least one parameter.</p>}
           <p className="mt-1 text-xs text-slate-400">
             Manage the master parameter list under Admin → Parameters.
           </p>

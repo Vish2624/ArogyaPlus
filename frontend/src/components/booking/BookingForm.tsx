@@ -37,6 +37,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
       customer_name: "",
       phone: "",
       email: "",
+      address: "",
       preferred_date: todayISODate(),
       visit_mode: visitMode,
     },
@@ -119,6 +120,23 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
           <label htmlFor="email" className="form-label">Email Address</label>
           <input id="email" type="email" className="form-input" placeholder="e.g. name@example.com" {...register("email")} />
           {errors.email && <p className="form-error">{errors.email.message}</p>}
+        </div>
+
+        <div className="sm:col-span-2">
+          <label htmlFor="address" className="form-label">Address</label>
+          <p className="mb-1.5 -mt-1 text-xs text-slate-500">
+            {visitMode === "home"
+              ? "Where should our phlebotomist collect the sample?"
+              : "Used for your booking record and to help you find the nearest partner lab."}
+          </p>
+          <textarea
+            id="address"
+            rows={2}
+            className="form-input resize-none"
+            placeholder="e.g. Villa 12, Al Wasl Road, Jumeirah, Dubai"
+            {...register("address")}
+          />
+          {errors.address && <p className="form-error">{errors.address.message}</p>}
         </div>
 
         <div>

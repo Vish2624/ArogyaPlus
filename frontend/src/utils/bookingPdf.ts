@@ -75,6 +75,19 @@ export async function downloadBookingPdf(booking: Booking, lookup: ItemMetaLooku
 
   y += Math.ceil(infoRows.length / 2) * 34 + 16;
 
+  if (booking.address) {
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...SLATE);
+    doc.text("ADDRESS", marginX, y);
+    doc.setFontSize(10.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...DARK);
+    const addressLines = doc.splitTextToSize(booking.address, pageWidth - marginX * 2) as string[];
+    doc.text(addressLines, marginX, y + 15);
+    y += 15 + addressLines.length * 13 + 12;
+  }
+
   autoTable(doc, {
     startY: y,
     head: [["Type", "Item", "Category", "Sample Type", "TAT", "Price"]],

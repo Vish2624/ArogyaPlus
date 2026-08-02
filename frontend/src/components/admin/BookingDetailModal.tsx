@@ -69,6 +69,12 @@ export default function BookingDetailModal({ booking, onClose, onStatusChange, i
           <p className="text-xs text-slate-500">Total Amount</p>
           <p className="font-bold text-slate-900">{formatCurrency(booking.total_amount)}</p>
         </div>
+        {booking.address && (
+          <div className="col-span-2">
+            <p className="text-xs text-slate-500">Address</p>
+            <p className="font-medium text-slate-800">{booking.address}</p>
+          </div>
+        )}
       </div>
 
       <div className="mt-5">

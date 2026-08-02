@@ -28,6 +28,7 @@ export const bookingFormSchema = z.object({
     .min(7, "Please enter a valid phone number.")
     .regex(PHONE_PATTERN, "Phone number must contain digits only."),
   email: z.string().min(1, "Email is required.").email("Please enter a valid email address."),
+  address: z.string().min(10, "Please enter your full address.").max(300),
   preferred_date: z.string().min(1, "Please select a preferred date."),
   time_slot: z.enum(TIME_SLOTS, { required_error: "Please select a time slot." }),
   visit_mode: z.enum(["home", "lab"], { required_error: "Please select a visit mode." }),

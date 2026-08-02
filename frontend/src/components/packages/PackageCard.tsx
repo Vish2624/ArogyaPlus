@@ -21,9 +21,6 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
   const labPrice = formatCurrencyParts(pkg.lab_price);
   const homePrice = formatCurrencyParts(pkg.home_price);
 
-  const VISIBLE_TEST_ROWS = 3;
-  const hasMoreTests = pkg.tests.length > VISIBLE_TEST_ROWS;
-
   return (
     <div
       className={`card relative flex h-full flex-col p-4 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40 sm:p-5 ${pkg.is_featured ? "ring-2 ring-primary-500" : ""}`}
@@ -61,11 +58,6 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
           </li>
         ))}
       </ul>
-      {hasMoreTests && (
-        <p className="mt-1 text-[11px] font-semibold text-primary-600">
-          +{pkg.tests.length - VISIBLE_TEST_ROWS} more — scroll to see all
-        </p>
-      )}
 
       <div className="mt-2.5 grid grid-cols-2 gap-2.5 border-t border-slate-100 pt-2.5 sm:mt-3 sm:gap-3 sm:pt-3">
         <div>

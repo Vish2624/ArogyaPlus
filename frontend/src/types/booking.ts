@@ -30,6 +30,7 @@ export interface BookingCreatePayload {
   gender: Gender;
   phone: string;
   email: string;
+  address: string;
   preferred_date: string;
   time_slot: string;
   visit_mode: VisitMode;
@@ -44,6 +45,12 @@ export interface Booking {
   gender: Gender;
   phone: string;
   email: string;
+  /**
+   * Optional because the backend hasn't added this column yet — currently accepted on
+   * `POST /bookings` but silently dropped (verified against the live API). Once it's added,
+   * this will start coming back populated with no other frontend changes needed.
+   */
+  address?: string | null;
   preferred_date: string;
   time_slot: string;
   visit_mode: VisitMode;

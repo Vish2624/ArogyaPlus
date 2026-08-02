@@ -68,7 +68,7 @@ export default function BookingPage() {
 
           <div className="card p-6 lg:col-span-3">
             <div className="mb-5 flex items-center gap-2.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
                 <ClipboardList className="h-4 w-4" aria-hidden="true" />
               </span>
               <h2 className="text-base font-semibold text-slate-900">Your Details</h2>

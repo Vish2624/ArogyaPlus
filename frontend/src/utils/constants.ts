@@ -1,7 +1,7 @@
 export const APP_NAME = "ArogyaPlus";
 
 export const CONTACT = {
-  phone: "+971 4 123 4567",
+  phone: "+971 58 580 2248",
   whatsapp: "+971 58 580 2248",
   whatsappLink: "https://wa.me/971585802248",
   email: "support@arogyaplus.com",

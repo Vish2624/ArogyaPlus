@@ -48,7 +48,7 @@ export default function Footer() {
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">
                 <Phone className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
-              <a href={`tel:${CONTACT.phone}`} className={LINK_CLASS}>{CONTACT.phone}</a>
+              <a href={`tel:${CONTACT.phone.replace(/\s+/g, "")}`} className={LINK_CLASS}>{CONTACT.phone}</a>
             </li>
             <li className="flex items-center justify-center gap-2.5 sm:justify-start">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">

@@ -23,9 +23,6 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
   const Icon = iconForCategory(pkg.category);
   const style = categoryStyle(pkg.category);
 
-  const VISIBLE_TEST_ROWS = 3;
-  const hasMoreTests = pkg.tests.length > VISIBLE_TEST_ROWS;
-
   return (
     <div
       className={`card relative flex h-full flex-col p-4 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40 sm:p-6 ${
@@ -79,11 +76,6 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
           </li>
         ))}
       </ul>
-      {hasMoreTests && (
-        <p className="mt-1 text-[11px] font-semibold text-primary-600">
-          +{pkg.tests.length - VISIBLE_TEST_ROWS} more — scroll to see all {pkg.tests.length} tests
-        </p>
-      )}
 
       <div className="mt-3 flex items-center gap-3 border-t border-slate-100 pt-2.5 sm:mt-4 sm:pt-3">
         <button
