@@ -99,6 +99,7 @@ export default function TestCard({ test, onViewDetails }: TestCardProps) {
               category: test.category,
               labPrice: test.lab_price,
               homePrice: test.home_price,
+              tat: test.tat,
             });
             showToast(`${test.name} added to cart`);
           }}

@@ -105,6 +105,7 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
               category: pkg.category,
               labPrice: pkg.lab_price,
               homePrice: pkg.home_price,
+              tat: pkg.tat,
             });
             showToast(`${pkg.name} added to cart`);
           }}

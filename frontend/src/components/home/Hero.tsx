@@ -192,6 +192,7 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
                             category: featuredPackage.category,
                             labPrice: featuredPackage.lab_price,
                             homePrice: featuredPackage.home_price,
+                            tat: featuredPackage.tat,
                           });
                           showToast(`${featuredPackage.name} added to cart`);
                         }}

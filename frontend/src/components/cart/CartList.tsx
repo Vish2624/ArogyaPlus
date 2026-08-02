@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Clock, Trash2 } from "lucide-react";
 
 import EmptyState from "@/components/common/EmptyState";
 import { itemPrice, useCartStore } from "@/store/cartStore";
@@ -30,6 +30,12 @@ export default function CartList() {
               </span>
               <p className="text-sm font-semibold text-slate-900">{item.name}</p>
               {item.category && <p className="text-xs text-slate-500">{item.category}</p>}
+              {item.tat && (
+                <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary-700">
+                  <Clock className="h-3 w-3" aria-hidden="true" />
+                  Report in {item.tat}
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <p className="text-slate-900">

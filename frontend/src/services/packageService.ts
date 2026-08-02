@@ -25,9 +25,15 @@ function normalizePackage(raw: Package): Package {
   };
 }
 
+/** Falls back to `id` order when `display_order` isn't set yet, so behavior is unchanged until the backend populates it. */
+function byDisplayOrder(a: Package, b: Package): number {
+  return (a.display_order ?? a.id) - (b.display_order ?? b.id);
+}
+
 export async function listPackages(query: PackageQuery = {}): Promise<Package[]> {
   const { data } = await api.get<Package[]>("/packages", { params: query });
-  return data.map(normalizePackage);
+  const packages = data.map(normalizePackage);
+  return query.sort ? packages : packages.sort(byDisplayOrder);
 }
 
 export async function getPackage(id: number): Promise<Package> {
@@ -39,7 +45,7 @@ export async function getPackage(id: number): Promise<Package> {
 
 export async function adminListPackages(): Promise<Package[]> {
   const { data } = await api.get<Package[]>("/admin/packages");
-  return data.map(normalizePackage);
+  return data.map(normalizePackage).sort(byDisplayOrder);
 }
 
 export async function adminGetPackage(id: number): Promise<Package> {
@@ -63,4 +69,9 @@ export async function adminDeletePackage(id: number): Promise<void> {
 
 export async function adminReorderPackageTests(packageId: number, orderedIds: number[]): Promise<Package> {
   return adminUpdatePackage(packageId, { test_ids: orderedIds });
+}
+
+/** Persists a new home-page display order for packages by writing a fresh `display_order` to each. */
+export async function adminReorderPackages(orderedIds: number[]): Promise<void> {
+  await Promise.all(orderedIds.map((id, index) => adminUpdatePackage(id, { display_order: index })));
 }

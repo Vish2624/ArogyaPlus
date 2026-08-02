@@ -126,6 +126,10 @@
   .animate-float {
     animation: float 3.5s ease-in-out infinite;
   }
+
+  .animate-marquee {
+    animation: marquee 26s linear infinite;
+  }
 }
 
 @keyframes hero-slide-in-rtl {
@@ -180,5 +184,14 @@
   }
   50% {
     transform: translateY(-6px);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }

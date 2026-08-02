@@ -13,6 +13,12 @@ export interface Test {
   original_home_price: number | null;
   tat: string | null;
   is_active: boolean;
+  /**
+   * Controls placement order on the public home page (lower shows first). Optional because the
+   * backend hasn't added this field yet — falls back to a stable default until it does. Once the
+   * backend supports it, `adminReorderTests` persists new values via the normal update endpoint.
+   */
+  display_order?: number;
   created_at: string;
   updated_at: string;
   parameters: Parameter[];
@@ -30,4 +36,5 @@ export interface TestInput {
   original_home_price?: number | null;
   tat?: string | null;
   is_active: boolean;
+  display_order?: number;
 }

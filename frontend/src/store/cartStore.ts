@@ -10,6 +10,7 @@ export interface CartItem {
   category: string | null;
   labPrice: number;
   homePrice: number;
+  tat?: string | null;
 }
 
 interface CartState {

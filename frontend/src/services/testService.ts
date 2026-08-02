@@ -32,9 +32,15 @@ export function normalizeTest(raw: Test): Test {
   };
 }
 
+/** Falls back to `id` order when `display_order` isn't set yet, so behavior is unchanged until the backend populates it. */
+function byDisplayOrder(a: Test, b: Test): number {
+  return (a.display_order ?? a.id) - (b.display_order ?? b.id);
+}
+
 export async function listTests(query: TestQuery = {}): Promise<Test[]> {
   const { data } = await api.get<Test[]>("/tests", { params: query });
-  return data.map(normalizeTest);
+  const tests = data.map(normalizeTest);
+  return query.sort ? tests : tests.sort(byDisplayOrder);
 }
 
 export async function getTest(id: number): Promise<Test> {
@@ -46,7 +52,7 @@ export async function getTest(id: number): Promise<Test> {
 
 export async function adminListTests(): Promise<Test[]> {
   const { data } = await api.get<Test[]>("/admin/tests");
-  return data.map(normalizeTest);
+  return data.map(normalizeTest).sort(byDisplayOrder);
 }
 
 export async function adminGetTest(id: number): Promise<Test> {
@@ -81,4 +87,9 @@ export async function adminRemoveTestParameter(testId: number, parameterId: numb
 export async function adminReorderTestParameters(testId: number, orderedIds: number[]): Promise<Test> {
   const { data } = await api.put<Test>(`/admin/tests/${testId}/parameters/reorder`, { ordered_ids: orderedIds });
   return normalizeTest(data);
+}
+
+/** Persists a new home-page display order for tests by writing a fresh `display_order` to each. */
+export async function adminReorderTests(orderedIds: number[]): Promise<void> {
+  await Promise.all(orderedIds.map((id, index) => adminUpdateTest(id, { display_order: index })));
 }

@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import CartDrawer from "@/components/cart/CartDrawer";
 import ScrollToHash from "@/components/common/ScrollToHash";
 import Toast from "@/components/common/Toast";
+import DisclaimerTicker from "@/components/layout/DisclaimerTicker";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import QuickAccessButtons from "@/components/layout/QuickAccessButtons";
@@ -17,10 +18,12 @@ export default function PublicLayout() {
         Skip to main content
       </a>
       <ScrollToHash />
+      <DisclaimerTicker />
       <Header />
       <main id="main-content" className="flex-1">
         <Outlet />
       </main>
+      <DisclaimerTicker />
       <Footer />
       <CartDrawer />
       <QuickAccessButtons />

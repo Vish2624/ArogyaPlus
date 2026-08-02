@@ -36,6 +36,7 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
               category: test.category,
               labPrice: test.lab_price,
               homePrice: test.home_price,
+              tat: test.tat,
             });
             showToast(`${test.name} added to cart`);
             onClose();

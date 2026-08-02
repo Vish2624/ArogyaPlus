@@ -1,4 +1,4 @@
-import { ListTree, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, ListTree, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import {
   adminCreatePackage,
   adminDeletePackage,
   adminListPackages,
+  adminReorderPackages,
   adminUpdatePackage,
 } from "@/services/packageService";
 import { adminListTests } from "@/services/testService";
@@ -26,6 +27,8 @@ export default function AdminPackagesPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [dragId, setDragId] = useState<number | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -85,12 +88,41 @@ export default function AdminPackagesPage() {
     }
   };
 
+  const handleDrop = async (targetId: number) => {
+    if (dragId === null || dragId === targetId) {
+      setDragId(null);
+      return;
+    }
+    const next = [...packages];
+    const fromIndex = next.findIndex((p) => p.id === dragId);
+    const toIndex = next.findIndex((p) => p.id === targetId);
+    setDragId(null);
+    if (fromIndex === -1 || toIndex === -1) return;
+
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    setPackages(next);
+
+    setReordering(true);
+    try {
+      await adminReorderPackages(next.map((p) => p.id));
+    } catch (err) {
+      window.alert(getApiErrorMessage(err, "Could not save the new order."));
+      loadData();
+    } finally {
+      setReordering(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Packages</h1>
-          <p className="mt-1 text-sm text-slate-500">Manage health packages, pricing and included tests.</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Manage health packages, pricing and included tests. Drag rows by the handle to reorder how they
+            appear on the home page.{reordering && <span className="ml-1.5 text-primary-600">Saving order...</span>}
+          </p>
         </div>
         <button type="button" onClick={openAddModal} className="btn-primary">
           <Plus className="h-4 w-4" aria-hidden="true" />
@@ -109,6 +141,7 @@ export default function AdminPackagesPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-100 text-xs uppercase text-slate-500">
+                  <th className="w-8 px-2 py-3" aria-hidden="true" />
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3">Lab Price</th>
@@ -120,7 +153,19 @@ export default function AdminPackagesPage() {
               </thead>
               <tbody>
                 {packages.map((pkg) => (
-                  <tr key={pkg.id} className="border-b border-slate-50 transition-colors hover:bg-slate-50">
+                  <tr
+                    key={pkg.id}
+                    draggable
+                    onDragStart={() => setDragId(pkg.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(pkg.id)}
+                    className={`border-b border-slate-50 transition-colors hover:bg-slate-50 ${dragId === pkg.id ? "opacity-40" : ""}`}
+                  >
+                    <td className="px-2 py-3 text-center">
+                      <span className="inline-flex cursor-grab text-slate-300 hover:text-slate-400" aria-hidden="true">
+                        <GripVertical className="h-4 w-4" />
+                      </span>
+                    </td>
                     <td className="px-4 py-3 font-medium text-slate-800">
                       {pkg.name}
                       {pkg.is_featured && <span className="badge ml-2 bg-primary-50 text-primary-700">Most Popular</span>}

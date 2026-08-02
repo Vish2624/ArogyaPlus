@@ -10,7 +10,7 @@ export interface ReorderableItem {
 interface ReorderableListProps {
   items: ReorderableItem[];
   onReorder: (orderedIds: number[]) => void;
-  onRemove: (id: number) => void;
+  onRemove?: (id: number) => void;
   removingId?: number | null;
   emptyLabel?: string;
 }
@@ -88,15 +88,17 @@ export default function ReorderableList({
             >
               <ChevronDown className="h-4 w-4" />
             </button>
-            <button
-              type="button"
-              disabled={removingId === item.id}
-              onClick={() => onRemove(item.id)}
-              aria-label={`Remove ${item.name}`}
-              className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            {onRemove && (
+              <button
+                type="button"
+                disabled={removingId === item.id}
+                onClick={() => onRemove(item.id)}
+                aria-label={`Remove ${item.name}`}
+                className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </li>
       ))}

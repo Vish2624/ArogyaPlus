@@ -38,6 +38,7 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
               category: pkg.category,
               labPrice: pkg.lab_price,
               homePrice: pkg.home_price,
+              tat: pkg.tat,
             });
             showToast(`${pkg.name} added to cart`);
             onClose();

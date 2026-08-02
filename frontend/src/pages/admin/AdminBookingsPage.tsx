@@ -1,4 +1,4 @@
-import { ChevronDown, Download, Eye, Search } from "lucide-react";
+import { ChevronDown, Download, Eye, FileDown, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import BookingDetailModal from "@/components/admin/BookingDetailModal";
@@ -13,6 +13,7 @@ import { adminListTests } from "@/services/testService";
 import type { Booking, BookingStatus } from "@/types/booking";
 import { buildItemMetaLookup } from "@/utils/bookingItemMeta";
 import { downloadBookingsCsv } from "@/utils/bookingCsv";
+import { downloadBookingPdf } from "@/utils/bookingPdf";
 import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
 
 const STATUS_OPTIONS: BookingStatus[] = ["New", "Contacted", "Done"];
@@ -26,6 +27,7 @@ export default function AdminBookingsPage() {
   const [dateFilter, setDateFilter] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [itemMeta, setItemMeta] = useState(() => buildItemMetaLookup([], []));
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   useEffect(() => {
     Promise.all([adminListTests(), adminListPackages()])
@@ -65,6 +67,18 @@ export default function AdminBookingsPage() {
       setSelectedBooking((prev) => (prev && prev.id === id ? updated : prev));
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Could not update booking status."));
+    }
+  };
+
+  const handleDownloadPdf = async (booking: Booking) => {
+    setDownloadingId(booking.id);
+    try {
+      await downloadBookingPdf(booking, itemMeta);
+    } catch (err) {
+      window.alert("Could not generate the PDF. Please try again.");
+      console.error(err);
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -152,15 +166,27 @@ export default function AdminBookingsPage() {
                     <td className="px-4 py-3 font-medium text-slate-800">{formatCurrency(booking.total_amount)}</td>
                     <td className="px-4 py-3"><BookingStatusBadge status={booking.status} /></td>
                     <td className="px-4 py-3 text-xs text-slate-500">{formatDateTime(booking.created_at)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedBooking(booking)}
-                        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-700"
-                        aria-label={`View booking ${booking.booking_reference}`}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedBooking(booking)}
+                          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-700"
+                          aria-label={`View booking ${booking.booking_reference}`}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadPdf(booking)}
+                          disabled={downloadingId === booking.id}
+                          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-700 disabled:opacity-40"
+                          aria-label={`Download booking ${booking.booking_reference} as PDF`}
+                          title="Download PDF"
+                        >
+                          <FileDown className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

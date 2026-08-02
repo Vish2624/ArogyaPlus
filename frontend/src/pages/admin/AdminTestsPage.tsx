@@ -1,4 +1,4 @@
-import { ListTree, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, ListTree, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -14,6 +14,7 @@ import {
   adminDeleteTest,
   adminListTests,
   adminRemoveTestParameter,
+  adminReorderTests,
   adminUpdateTest,
 } from "@/services/testService";
 import type { Parameter } from "@/types/parameter";
@@ -28,6 +29,8 @@ export default function AdminTestsPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTest, setEditingTest] = useState<Test | null>(null);
+  const [dragId, setDragId] = useState<number | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   const loadTests = async () => {
     setLoading(true);
@@ -104,12 +107,41 @@ export default function AdminTestsPage() {
     }
   };
 
+  const handleDrop = async (targetId: number) => {
+    if (dragId === null || dragId === targetId) {
+      setDragId(null);
+      return;
+    }
+    const next = [...tests];
+    const fromIndex = next.findIndex((t) => t.id === dragId);
+    const toIndex = next.findIndex((t) => t.id === targetId);
+    setDragId(null);
+    if (fromIndex === -1 || toIndex === -1) return;
+
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    setTests(next);
+
+    setReordering(true);
+    try {
+      await adminReorderTests(next.map((t) => t.id));
+    } catch (err) {
+      window.alert(getApiErrorMessage(err, "Could not save the new order."));
+      loadTests();
+    } finally {
+      setReordering(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Tests</h1>
-          <p className="mt-1 text-sm text-slate-500">Manage individual laboratory tests and pricing.</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Manage individual laboratory tests and pricing. Drag rows by the handle to reorder how they
+            appear on the home page.{reordering && <span className="ml-1.5 text-primary-600">Saving order...</span>}
+          </p>
         </div>
         <button type="button" onClick={openAddModal} className="btn-primary">
           <Plus className="h-4 w-4" aria-hidden="true" />
@@ -128,6 +160,7 @@ export default function AdminTestsPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-100 text-xs uppercase text-slate-500">
+                  <th className="w-8 px-2 py-3" aria-hidden="true" />
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3">Sample Type</th>
@@ -140,7 +173,19 @@ export default function AdminTestsPage() {
               </thead>
               <tbody>
                 {tests.map((test) => (
-                  <tr key={test.id} className="border-b border-slate-50 transition-colors hover:bg-slate-50">
+                  <tr
+                    key={test.id}
+                    draggable
+                    onDragStart={() => setDragId(test.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(test.id)}
+                    className={`border-b border-slate-50 transition-colors hover:bg-slate-50 ${dragId === test.id ? "opacity-40" : ""}`}
+                  >
+                    <td className="px-2 py-3 text-center">
+                      <span className="inline-flex cursor-grab text-slate-300 hover:text-slate-400" aria-hidden="true">
+                        <GripVertical className="h-4 w-4" />
+                      </span>
+                    </td>
                     <td className="px-4 py-3 font-medium text-slate-800">{test.name}</td>
                     <td className="px-4 py-3 text-slate-500">{test.category ?? "-"}</td>
                     <td className="px-4 py-3 text-slate-500">{test.sample_type ?? "-"}</td>
