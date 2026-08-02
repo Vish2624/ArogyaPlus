@@ -1,4 +1,4 @@
-import { ShoppingCart, Truck, X } from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 import { useEffect, useId, useRef } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ export default function CartDrawer() {
   const open = useCartStore((s) => s.drawerOpen);
   const closeDrawer = useCartStore((s) => s.closeDrawer);
   const items = useCartStore((s) => s.items);
-  const visitMode = useCartStore((s) => s.visitMode);
+  const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);
   const total = useCartTotal();
   const totalAmount = Number.isFinite(total)
     ? total.toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -66,8 +66,11 @@ export default function CartDrawer() {
 
   const whatsAppHref = () => {
     const lines = items.map(
-      (item) => `- ${item.name} (${item.type === "package" ? "Package" : "Test"}) — ${formatCurrency(itemPrice(item, visitMode))}`
+      (item) => `- ${item.name} (${item.type === "package" ? "Package" : "Test"}) — ${formatCurrency(itemPrice(item))}`
     );
+    if (homeCollectionAdded) {
+      lines.push(`- Home Collection Fee — AED 75.00`);
+    }
     const message = [
       "Hi ArogyaPlus! I'd like a quotation for:",
       "",
@@ -134,10 +137,6 @@ export default function CartDrawer() {
 
         {items.length > 0 && (
           <div className="border-t border-slate-100 p-5">
-            <p className="mb-4 flex items-center gap-2 rounded-lg bg-accent-500/10 px-3 py-2 text-xs font-semibold text-accent-700">
-              <Truck className="h-4 w-4 shrink-0" aria-hidden="true" />
-              Free home sample collection on every booking
-            </p>
             <div className="mb-4 flex items-center justify-between">
               <span className="text-sm font-semibold text-slate-700">Total</span>
               <span className="text-slate-900">

@@ -37,7 +37,7 @@ export default function Testimonials() {
           {TESTIMONIALS.map((testimonial, index) => (
             <div
               key={`${testimonial.name}-${index}`}
-              className="card bg-white p-6 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40 sm:p-8"
+              className="card bg-white p-6 hover:-translate-y-0.5 hover:shadow-hover hover:ring-primary-500/40 sm:p-8"
             >
               <StarRating rating={testimonial.rating} />
               <p className="mt-4 text-base leading-7 text-slate-600">&ldquo;{testimonial.feedback}&rdquo;</p>

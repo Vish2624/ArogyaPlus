@@ -11,6 +11,8 @@ export async function uploadImage(file: File): Promise<string> {
   formData.append("file", file);
   // Let the browser set the multipart Content-Type (with the required boundary) itself —
   // forcing it manually here would omit the boundary and break upload parsing server-side.
-  const { data } = await api.post<{ url: string }>("/admin/uploads/image", formData);
+  const { data } = await api.post<{ url: string }>("/admin/uploads/image", formData, {
+    headers: { "Content-Type": undefined },
+  });
   return data.url.startsWith("http") ? data.url : `${API_ORIGIN}${data.url}`;
 }

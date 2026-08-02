@@ -10,6 +10,7 @@ import { adminListParameters } from "@/services/parameterService";
 import { uploadImage } from "@/services/uploadService";
 import type { Parameter } from "@/types/parameter";
 import type { Test } from "@/types/test";
+import { TEST_CATEGORIES } from "@/utils/constants";
 import { testFormSchema, type TestFormValues } from "@/utils/validation";
 
 interface TestFormModalProps {
@@ -32,6 +33,7 @@ const DEFAULTS: TestFormValues = {
   original_lab_price: undefined,
   original_home_price: undefined,
   tat: "",
+  fasting_required: null,
   is_active: true,
 };
 
@@ -55,6 +57,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
   } = useForm<TestFormValues>({ resolver: zodResolver(testFormSchema), defaultValues: DEFAULTS });
 
   const imageUrl = watch("image_url");
+  const fastingRequired = watch("fasting_required");
 
   useEffect(() => {
     if (!open) return;
@@ -75,6 +78,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
             original_lab_price: initialTest.original_lab_price ?? undefined,
             original_home_price: initialTest.original_home_price ?? undefined,
             tat: initialTest.tat ?? "",
+            fasting_required: initialTest.fasting_required ?? null,
             is_active: initialTest.is_active,
           }
         : DEFAULTS
@@ -152,7 +156,10 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="form-label" htmlFor="test-category">Category</label>
-            <input id="test-category" className="form-input" {...register("category")} />
+            <input id="test-category" className="form-input" list="test-category-options" placeholder="Select or type a category" {...register("category")} />
+            <datalist id="test-category-options">
+              {TEST_CATEGORIES.map((c) => <option key={c} value={c} />)}
+            </datalist>
           </div>
           <div>
             <label className="form-label" htmlFor="test-tat">Report TAT</label>
@@ -160,20 +167,38 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
           </div>
         </div>
 
-        <div>
-          <label className="form-label" htmlFor="test-sample-type">Sample Type</label>
-          <input
-            id="test-sample-type"
-            className="form-input"
-            list="sample-type-suggestions"
-            placeholder="e.g. EDTA, Serum, Fasting"
-            {...register("sample_type")}
-          />
-          <datalist id="sample-type-suggestions">
-            {SAMPLE_TYPE_SUGGESTIONS.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="form-label" htmlFor="test-sample-type">Sample Type</label>
+            <input
+              id="test-sample-type"
+              className="form-input"
+              list="sample-type-suggestions"
+              placeholder="e.g. EDTA, Serum, Fasting"
+              {...register("sample_type")}
+            />
+            <datalist id="sample-type-suggestions">
+              {SAMPLE_TYPE_SUGGESTIONS.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <label className="form-label" htmlFor="test-fasting">Fasting Requirement</label>
+            <select
+              id="test-fasting"
+              className="form-input"
+              value={fastingRequired === true ? "fasting_required" : fastingRequired === false ? "non_fasting" : ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                setValue("fasting_required", v === "fasting_required" ? true : v === "non_fasting" ? false : null);
+              }}
+            >
+              <option value="">— Not specified —</option>
+              <option value="fasting_required">Fasting Required</option>
+              <option value="non_fasting">Non Fasting</option>
+            </select>
+          </div>
         </div>
 
         <div>

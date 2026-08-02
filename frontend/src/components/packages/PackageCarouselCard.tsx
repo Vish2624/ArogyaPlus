@@ -1,4 +1,4 @@
-import { CheckCircle2, Eye } from "lucide-react";
+import { CheckCircle2, Eye, Truck, Utensils } from "lucide-react";
 
 import { useCartStore } from "@/store/cartStore";
 import { useToastStore } from "@/store/toastStore";
@@ -25,7 +25,7 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
 
   return (
     <div
-      className={`card relative flex h-full flex-col p-4 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40 sm:p-6 ${
+      className={`card relative flex h-full flex-col p-4 hover:-translate-y-0.5 hover:shadow-hover hover:ring-primary-500/40 sm:p-6 ${
         pkg.is_featured ? "ring-2 ring-primary-500" : ""
       }`}
     >
@@ -67,6 +67,22 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
           </span>
         )}
       </div>
+      <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-primary-600">
+        <Truck className="h-3 w-3" aria-hidden="true" />
+        Home collection available
+      </p>
+      {pkg.fasting_required === true && (
+        <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-amber-700">
+          <Utensils className="h-3 w-3 text-amber-600" aria-hidden="true" />
+          Fasting Required
+        </p>
+      )}
+      {pkg.fasting_required === false && (
+        <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
+          <Utensils className="h-3 w-3 text-emerald-600" aria-hidden="true" />
+          Non Fasting
+        </p>
+      )}
 
       <ul className="custom-scrollbar mt-2.5 max-h-24 flex-1 space-y-1 overflow-y-auto border-t border-slate-100 pr-2 pt-2.5 text-xs text-slate-600 sm:mt-3 sm:max-h-28 sm:space-y-1.5 sm:pt-3">
         {pkg.tests.map((test) => (
@@ -98,6 +114,7 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
               labPrice: pkg.lab_price,
               homePrice: pkg.home_price,
               tat: pkg.tat,
+              includedTestIds: pkg.tests.map((t) => t.id),
             });
             showToast(`${pkg.name} added to cart`);
           }}

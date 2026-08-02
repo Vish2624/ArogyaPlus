@@ -1,6 +1,6 @@
 import api from "./api";
 import type { Test, TestInput } from "@/types/test";
-import { dummyParametersForCategory, dummySampleTypeForCategory } from "@/utils/dummyParameters";
+import type { PaginatedResponse } from "@/types/pagination";
 
 export interface TestQuery {
   search?: string;
@@ -8,27 +8,17 @@ export interface TestQuery {
   sort?: "price_asc" | "price_desc";
 }
 
-/**
- * The live backend doesn't have `parameters`/`sample_type` yet (they're a planned addition —
- * see the admin Parameters section). Normalize so the rest of the app can always rely on
- * `test.parameters` being an array, and fall back to a dummy catalogue (matched by category)
- * so the feature can be reviewed end-to-end until the backend ships those fields.
- *
- * It also serializes decimal price fields as JSON strings (e.g. "90.00"), not numbers. Left
- * as-is, `+` on cart totals silently does string concatenation instead of addition, producing
- * NaN — coerce to real numbers here so the rest of the app can always treat these as numbers.
- */
 export function normalizeTest(raw: Test): Test {
-  const parameters = raw.parameters?.length ? raw.parameters : dummyParametersForCategory(raw.category);
   return {
     ...raw,
-    sample_type: raw.sample_type ?? dummySampleTypeForCategory(raw.category),
+    sample_type: raw.sample_type ?? null,
     image_url: raw.image_url ?? null,
     lab_price: Number(raw.lab_price),
     home_price: Number(raw.home_price),
     original_lab_price: raw.original_lab_price != null ? Number(raw.original_lab_price) : null,
     original_home_price: raw.original_home_price != null ? Number(raw.original_home_price) : null,
-    parameters,
+    fasting_required: raw.fasting_required ?? null,
+    parameters: raw.parameters ?? [],
   };
 }
 
@@ -38,8 +28,8 @@ function byDisplayOrder(a: Test, b: Test): number {
 }
 
 export async function listTests(query: TestQuery = {}): Promise<Test[]> {
-  const { data } = await api.get<Test[]>("/tests", { params: query });
-  const tests = data.map(normalizeTest);
+  const { data } = await api.get<PaginatedResponse<Test>>("/tests", { params: { ...query, page_size: 10 } });
+  const tests = data.items.map(normalizeTest);
   return query.sort ? tests : tests.sort(byDisplayOrder);
 }
 
@@ -51,8 +41,8 @@ export async function getTest(id: number): Promise<Test> {
 // --- Admin ---
 
 export async function adminListTests(): Promise<Test[]> {
-  const { data } = await api.get<Test[]>("/admin/tests");
-  return data.map(normalizeTest).sort(byDisplayOrder);
+  const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params: { page_size: 10 } });
+  return data.items.map(normalizeTest).sort(byDisplayOrder);
 }
 
 export async function adminGetTest(id: number): Promise<Test> {

@@ -15,13 +15,18 @@ export const NAV_LINKS = [
 ];
 
 export const SERVICES_LIST = [
-  "Health Package Bookings",
-  "Individual Lab Tests",
-  "Home Sample Collection",
-  "Lab Visit Appointments",
+  { label: "Health Package Bookings", href: "/packages" },
+  { label: "Individual Lab Tests", href: "/tests" },
+  { label: "Home Sample Collection", href: "/booking" },
+  { label: "Lab Visit Appointments", href: "/booking" },
 ];
 
 export { TIME_SLOTS } from "@/types/booking";
 
 export const MIN_AGE = 1;
 export const MAX_AGE = 99;
+
+export const HOME_COLLECTION_FEE = 75;
+
+export const PACKAGE_CATEGORIES = ["Essential", "Comprehensive", "Blood", "Specialized"] as const;
+export const TEST_CATEGORIES = ["Blood", "Specialized", "Comprehensive", "Essential", "Diabetes", "Cardiac", "Kidney", "Liver", "Thyroid", "Vitamin"] as const;

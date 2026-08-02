@@ -72,18 +72,34 @@ export default function AdminBannersPage() {
     }
   };
 
+  const atLimit = banners.length >= 3;
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Banners</h1>
-          <p className="mt-1 text-sm text-slate-500">Manage the promotional banner strip shown on the home page.</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Manage the promotional banner strip shown on the home page.{" "}
+            <span className="font-medium text-slate-700">{banners.length}/3 banners used.</span>
+          </p>
         </div>
-        <button type="button" onClick={openAddModal} className="btn-primary">
+        <button
+          type="button"
+          onClick={openAddModal}
+          disabled={atLimit}
+          title={atLimit ? "Maximum of 3 banners allowed. Delete one to add another." : undefined}
+          className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+        >
           <Plus className="h-4 w-4" aria-hidden="true" />
           Add Banner
         </button>
       </div>
+      {atLimit && (
+        <p className="mt-3 rounded-lg bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+          Banner limit reached (3/3). Delete an existing banner to add a new one.
+        </p>
+      )}
 
       <div className="mt-6">
         {loading && <Spinner label="Loading banners..." />}

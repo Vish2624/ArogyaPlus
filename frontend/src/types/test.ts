@@ -12,6 +12,7 @@ export interface Test {
   original_lab_price: number | null;
   original_home_price: number | null;
   tat: string | null;
+  fasting_required: boolean | null;
   is_active: boolean;
   /**
    * Controls placement order on the public home page (lower shows first). Optional because the
@@ -35,6 +36,7 @@ export interface TestInput {
   original_lab_price?: number | null;
   original_home_price?: number | null;
   tat?: string | null;
+  fasting_required?: boolean | null;
   is_active: boolean;
   display_order?: number;
 }

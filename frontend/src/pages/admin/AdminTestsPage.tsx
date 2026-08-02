@@ -156,6 +156,11 @@ export default function AdminTestsPage() {
           <EmptyState title="No tests yet" description="Add your first laboratory test to get started." />
         )}
         {!loading && !error && tests.length > 0 && (
+          <>
+            <p className="mb-3 text-sm text-slate-500">
+              Showing <span className="font-semibold text-slate-700">{tests.length}</span>{" "}
+              {tests.length === 1 ? "test" : "tests"}
+            </p>
           <div className="card overflow-x-auto p-2">
             <table className="w-full text-left text-sm">
               <thead>
@@ -224,6 +229,7 @@ export default function AdminTestsPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

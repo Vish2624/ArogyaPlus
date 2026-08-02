@@ -11,6 +11,7 @@ export interface Package {
   original_lab_price: number | null;
   original_home_price: number | null;
   tat: string | null;
+  fasting_required: boolean | null;
   is_active: boolean;
   is_featured: boolean;
   /**
@@ -34,6 +35,7 @@ export interface PackageInput {
   original_lab_price?: number | null;
   original_home_price?: number | null;
   tat?: string | null;
+  fasting_required?: boolean | null;
   is_active: boolean;
   is_featured: boolean;
   display_order?: number;

@@ -5,6 +5,7 @@ import BookingDetailModal from "@/components/admin/BookingDetailModal";
 import BookingStatusBadge from "@/components/admin/BookingStatusBadge";
 import EmptyState from "@/components/common/EmptyState";
 import ErrorState from "@/components/common/ErrorState";
+import Pagination from "@/components/common/Pagination";
 import Spinner from "@/components/common/Spinner";
 import { getApiErrorMessage } from "@/services/api";
 import { adminListBookings, adminUpdateBookingStatus } from "@/services/bookingService";
@@ -17,6 +18,7 @@ import { downloadBookingPdf } from "@/utils/bookingPdf";
 import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
 
 const STATUS_OPTIONS: BookingStatus[] = ["New", "Contacted", "Done"];
+const PAGE_SIZE = 20;
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -25,6 +27,9 @@ export default function AdminBookingsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "">("");
   const [dateFilter, setDateFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [itemMeta, setItemMeta] = useState(() => buildItemMetaLookup([], []));
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
@@ -41,12 +46,16 @@ export default function AdminBookingsPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await adminListBookings({
+      const result = await adminListBookings({
         search: search || undefined,
         status_filter: statusFilter || undefined,
         booking_date: dateFilter || undefined,
+        page,
+        page_size: PAGE_SIZE,
       });
-      setBookings(data);
+      setBookings(result.items);
+      setTotalPages(result.total_pages);
+      setTotalRows(result.total_rows);
     } catch (err) {
       setError(getApiErrorMessage(err, "We couldn't load bookings. Please try again."));
     } finally {
@@ -55,10 +64,11 @@ export default function AdminBookingsPage() {
   };
 
   useEffect(() => {
-    const timeout = setTimeout(loadBookings, 300);
+    const delay = search ? 300 : 0;
+    const timeout = setTimeout(loadBookings, delay);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, statusFilter, dateFilter]);
+  }, [search, statusFilter, dateFilter, page]);
 
   const handleStatusChange = async (id: number, status: BookingStatus) => {
     try {
@@ -106,7 +116,7 @@ export default function AdminBookingsPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by name, phone, email or reference..."
             className="form-input pl-10"
           />
@@ -114,7 +124,7 @@ export default function AdminBookingsPage() {
         <div className="relative sm:w-48">
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as BookingStatus | "")}
+            onChange={(e) => { setStatusFilter(e.target.value as BookingStatus | ""); setPage(1); }}
             className="form-input w-full appearance-none pr-9"
           >
             <option value="">All Statuses</option>
@@ -127,7 +137,7 @@ export default function AdminBookingsPage() {
         <input
           type="date"
           value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
+          onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
           className="form-input sm:w-44"
         />
       </div>
@@ -139,60 +149,74 @@ export default function AdminBookingsPage() {
           <EmptyState title="No bookings found" description="Try adjusting your search or filters." />
         )}
         {!loading && !error && bookings.length > 0 && (
-          <div className="card overflow-x-auto p-2">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 text-xs uppercase text-slate-500">
-                  <th className="px-4 py-3">Reference</th>
-                  <th className="px-4 py-3">Customer</th>
-                  <th className="px-4 py-3">Visit</th>
-                  <th className="px-4 py-3">Date / Slot</th>
-                  <th className="px-4 py-3">Total</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Submitted</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="border-b border-slate-50 transition-colors hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-800">{booking.booking_reference}</td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {booking.customer_name}
-                      <div className="text-xs text-slate-500">{booking.phone}</div>
-                    </td>
-                    <td className="px-4 py-3 capitalize text-slate-500">{booking.visit_mode}</td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(booking.preferred_date)}<div className="text-xs">{booking.time_slot}</div></td>
-                    <td className="px-4 py-3 font-medium text-slate-800">{formatCurrency(booking.total_amount)}</td>
-                    <td className="px-4 py-3"><BookingStatusBadge status={booking.status} /></td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{formatDateTime(booking.created_at)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedBooking(booking)}
-                          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-700"
-                          aria-label={`View booking ${booking.booking_reference}`}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDownloadPdf(booking)}
-                          disabled={downloadingId === booking.id}
-                          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-700 disabled:opacity-40"
-                          aria-label={`Download booking ${booking.booking_reference} as PDF`}
-                          title="Download PDF"
-                        >
-                          <FileDown className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <p className="mb-3 text-sm text-slate-500">
+              Showing <span className="font-semibold text-slate-700">{bookings.length}</span> of{" "}
+              <span className="font-semibold text-slate-700">{totalRows}</span>{" "}
+              {totalRows === 1 ? "booking" : "bookings"}
+            </p>
+            <div className="card overflow-x-auto p-2">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-xs uppercase text-slate-500">
+                    <th className="px-4 py-3">Reference</th>
+                    <th className="px-4 py-3">Customer</th>
+                    <th className="px-4 py-3">Visit</th>
+                    <th className="px-4 py-3">Date / Slot</th>
+                    <th className="px-4 py-3">Total</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Submitted</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {bookings.map((booking) => (
+                    <tr key={booking.id} className="border-b border-slate-50 transition-colors hover:bg-slate-50">
+                      <td className="px-4 py-3 font-medium text-slate-800">{booking.booking_reference}</td>
+                      <td className="px-4 py-3 text-slate-600">
+                        {booking.customer_name}
+                        <div className="text-xs text-slate-500">{booking.phone}</div>
+                      </td>
+                      <td className="px-4 py-3 capitalize text-slate-500">{booking.visit_mode}</td>
+                      <td className="px-4 py-3 text-slate-500">{formatDate(booking.preferred_date)}<div className="text-xs">{booking.time_slot}</div></td>
+                      <td className="px-4 py-3 font-medium text-slate-800">{formatCurrency(booking.total_amount)}</td>
+                      <td className="px-4 py-3"><BookingStatusBadge status={booking.status} /></td>
+                      <td className="px-4 py-3 text-xs text-slate-500">{formatDateTime(booking.created_at)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedBooking(booking)}
+                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-700"
+                            aria-label={`View booking ${booking.booking_reference}`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadPdf(booking)}
+                            disabled={downloadingId === booking.id}
+                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-700 disabled:opacity-40"
+                            aria-label={`Download booking ${booking.booking_reference} as PDF`}
+                            title="Download PDF"
+                          >
+                            <FileDown className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalRows={totalRows}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
+          </>
         )}
       </div>
 

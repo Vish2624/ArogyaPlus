@@ -2,6 +2,7 @@ export type VisitMode = "home" | "lab";
 export type Gender = "Male" | "Female";
 export type BookingStatus = "New" | "Contacted" | "Done";
 export type CartItemType = "package" | "test";
+export type PaymentMode = "cash" | "online";
 
 export const TIME_SLOTS = [
   "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -34,6 +35,12 @@ export interface BookingCreatePayload {
   preferred_date: string;
   time_slot: string;
   visit_mode: VisitMode;
+  /**
+   * Not yet stored by the backend (no such column/serializer field exists there today) — sent
+   * on every submission so it starts working automatically once the backend adds support, same
+   * pattern as `address` below.
+   */
+  payment_mode: PaymentMode;
   items: BookingItemInput[];
 }
 
@@ -51,6 +58,12 @@ export interface Booking {
    * this will start coming back populated with no other frontend changes needed.
    */
   address?: string | null;
+  /**
+   * Optional because the backend hasn't added this column yet — accepted on `POST /bookings`
+   * but not persisted/returned. Once it's added, this starts coming back populated with no
+   * other frontend changes needed. See `address` above for the same pattern.
+   */
+  payment_mode?: PaymentMode | null;
   preferred_date: string;
   time_slot: string;
   visit_mode: VisitMode;

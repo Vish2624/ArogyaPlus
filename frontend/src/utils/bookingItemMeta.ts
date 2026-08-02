@@ -30,9 +30,10 @@ export function getItemMeta(item: BookingItem, lookup: ItemMetaLookup): ItemMeta
     };
   }
   const pkg = lookup.packagesById.get(item.item_id);
+  const sampleTypes = [...new Set((pkg?.tests ?? []).map((t) => t.sample_type).filter((s): s is string => Boolean(s)))];
   return {
     category: pkg?.category ?? null,
-    sampleType: null,
+    sampleType: sampleTypes.length > 0 ? sampleTypes.join(", ") : null,
     tat: pkg?.tat ?? null,
   };
 }

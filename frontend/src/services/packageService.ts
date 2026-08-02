@@ -1,6 +1,7 @@
 import api from "./api";
 import { normalizeTest } from "./testService";
 import type { Package, PackageInput } from "@/types/package";
+import type { PaginatedResponse } from "@/types/pagination";
 
 export interface PackageQuery {
   search?: string;
@@ -21,6 +22,7 @@ function normalizePackage(raw: Package): Package {
     home_price: Number(raw.home_price),
     original_lab_price: raw.original_lab_price != null ? Number(raw.original_lab_price) : null,
     original_home_price: raw.original_home_price != null ? Number(raw.original_home_price) : null,
+    fasting_required: raw.fasting_required ?? null,
     tests: (raw.tests ?? []).map(normalizeTest),
   };
 }
@@ -31,8 +33,8 @@ function byDisplayOrder(a: Package, b: Package): number {
 }
 
 export async function listPackages(query: PackageQuery = {}): Promise<Package[]> {
-  const { data } = await api.get<Package[]>("/packages", { params: query });
-  const packages = data.map(normalizePackage);
+  const { data } = await api.get<PaginatedResponse<Package>>("/packages", { params: { ...query, page_size: 10 } });
+  const packages = data.items.map(normalizePackage);
   return query.sort ? packages : packages.sort(byDisplayOrder);
 }
 
@@ -44,8 +46,8 @@ export async function getPackage(id: number): Promise<Package> {
 // --- Admin ---
 
 export async function adminListPackages(): Promise<Package[]> {
-  const { data } = await api.get<Package[]>("/admin/packages");
-  return data.map(normalizePackage).sort(byDisplayOrder);
+  const { data } = await api.get<PaginatedResponse<Package>>("/admin/packages", { params: { page_size: 10 } });
+  return data.items.map(normalizePackage).sort(byDisplayOrder);
 }
 
 export async function adminGetPackage(id: number): Promise<Package> {
@@ -67,8 +69,14 @@ export async function adminDeletePackage(id: number): Promise<void> {
   await api.delete(`/admin/packages/${id}`);
 }
 
+export async function adminRemovePackageTest(packageId: number, testId: number): Promise<Package> {
+  const { data } = await api.delete<Package>(`/admin/packages/${packageId}/tests/${testId}`);
+  return normalizePackage(data);
+}
+
 export async function adminReorderPackageTests(packageId: number, orderedIds: number[]): Promise<Package> {
-  return adminUpdatePackage(packageId, { test_ids: orderedIds });
+  const { data } = await api.patch<Package>(`/admin/packages/${packageId}/tests`, { test_ids: orderedIds });
+  return normalizePackage(data);
 }
 
 /** Persists a new home-page display order for packages by writing a fresh `display_order` to each. */

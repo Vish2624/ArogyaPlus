@@ -21,7 +21,7 @@ const HERO_TITLE = "Comprehensive Healthcare, Made Simple.";
 const HERO_SUBTITLE =
   "Book trusted health packages and laboratory tests from the comfort of your home or at our partner locations.";
 
-const AUTO_ADVANCE_MS = 6000;
+const AUTO_ADVANCE_MS = 9000;
 const SLIDE_HEIGHT = "h-[26rem] sm:h-[29rem] lg:h-[32rem]";
 
 export default function Hero({ banners, featuredPackage, onViewDetails }: HeroProps) {

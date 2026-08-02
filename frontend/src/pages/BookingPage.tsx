@@ -1,4 +1,4 @@
-import { ClipboardList, ShoppingBag } from "lucide-react";
+import { ClipboardList, PlusCircle, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { useState } from "react";
@@ -64,6 +64,10 @@ export default function BookingPage() {
                 <span className="text-xl font-extrabold">{formatCurrency(total).split(" ")[1]}</span>
               </span>
             </div>
+            <Link to="/packages" className="btn-secondary mt-4 w-full !text-xs">
+              <PlusCircle className="h-3.5 w-3.5" aria-hidden="true" />
+              Explore More
+            </Link>
           </div>
 
           <div className="card p-6 lg:col-span-3">

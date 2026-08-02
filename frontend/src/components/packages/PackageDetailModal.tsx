@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronDown, ChevronUp, Clock } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Clock, Utensils } from "lucide-react";
 import { useState } from "react";
 
 import Modal from "@/components/common/Modal";
@@ -39,6 +39,7 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
               labPrice: pkg.lab_price,
               homePrice: pkg.home_price,
               tat: pkg.tat,
+              includedTestIds: pkg.tests.map((t) => t.id),
             });
             showToast(`${pkg.name} added to cart`);
             onClose();
@@ -49,23 +50,41 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
         </button>
       }
     >
-      {pkg.description && <p className="text-sm text-slate-600">{pkg.description}</p>}
-
-      {pkg.tat && (
-        <div className="badge mt-3 gap-1.5 border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700">
-          <Clock className="h-4 w-4 text-primary-600" aria-hidden="true" />
-          Report in {pkg.tat}
+      {pkg.description && (
+        <div className="custom-scrollbar max-h-28 overflow-y-auto pr-1">
+          <p className="text-sm leading-relaxed text-slate-600">{pkg.description}</p>
         </div>
       )}
 
-      <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4">
+      <div className="mt-3 flex flex-wrap gap-2">
+        {pkg.tat && (
+          <span className="badge gap-1.5 border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700">
+            <Clock className="h-4 w-4 text-primary-600" aria-hidden="true" />
+            Report in {pkg.tat}
+          </span>
+        )}
+        {pkg.fasting_required === true && (
+          <span className="badge gap-1.5 border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">
+            <Utensils className="h-4 w-4 text-amber-600" aria-hidden="true" />
+            Fasting Required
+          </span>
+        )}
+        {pkg.fasting_required === false && (
+          <span className="badge gap-1.5 border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+            <Utensils className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+            Non Fasting
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 p-4">
         <div>
-          <p className="text-xs text-slate-500">Lab Visit Price</p>
+          <p className="text-xs text-slate-500">Price</p>
           <p className="text-lg font-bold text-slate-900">{formatCurrency(pkg.lab_price)}</p>
         </div>
-        <div>
-          <p className="text-xs text-slate-500">Home Visit Price</p>
-          <p className="text-lg font-bold text-slate-900">{formatCurrency(pkg.home_price)}</p>
+        <div className="text-right">
+          <p className="text-xs font-semibold text-primary-600">Home collection available</p>
+          <p className="text-xs text-slate-500">+AED 75 flat fee</p>
         </div>
       </div>
 

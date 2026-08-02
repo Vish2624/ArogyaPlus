@@ -4,6 +4,7 @@ import { MAX_AGE, MIN_AGE } from "./constants";
 import { TIME_SLOTS } from "@/types/booking";
 
 const NAME_PATTERN = /^[A-Za-z\s.'-]+$/;
+const COUNTRY_CODE_PATTERN = /^\+\d{1,4}$/;
 const PHONE_PATTERN = /^\d{7,15}$/;
 
 const optionalPrice = z.preprocess(
@@ -23,6 +24,10 @@ export const bookingFormSchema = z.object({
     .min(MIN_AGE, `Age must be at least ${MIN_AGE}.`)
     .max(MAX_AGE, `Age must be at most ${MAX_AGE}.`),
   gender: z.enum(["Male", "Female"], { required_error: "Please select a gender." }),
+  country_code: z
+    .string()
+    .min(1, "Required.")
+    .regex(COUNTRY_CODE_PATTERN, "Use format +971."),
   phone: z
     .string()
     .min(7, "Please enter a valid phone number.")
@@ -32,6 +37,7 @@ export const bookingFormSchema = z.object({
   preferred_date: z.string().min(1, "Please select a preferred date."),
   time_slot: z.enum(TIME_SLOTS, { required_error: "Please select a time slot." }),
   visit_mode: z.enum(["home", "lab"], { required_error: "Please select a visit mode." }),
+  payment_mode: z.enum(["cash", "online"], { required_error: "Please select a payment mode." }),
 });
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
@@ -54,6 +60,7 @@ export const testFormSchema = z.object({
   original_lab_price: optionalPrice,
   original_home_price: optionalPrice,
   tat: z.string().optional(),
+  fasting_required: z.boolean().nullable().optional(),
   is_active: z.boolean(),
 });
 
@@ -80,6 +87,7 @@ export const packageFormSchema = z.object({
   original_lab_price: optionalPrice,
   original_home_price: optionalPrice,
   tat: z.string().optional(),
+  fasting_required: z.boolean().nullable().optional(),
   is_active: z.boolean(),
   is_featured: z.boolean(),
   test_ids: z.array(z.number()).default([]),

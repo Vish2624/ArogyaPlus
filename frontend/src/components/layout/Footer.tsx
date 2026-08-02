@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Logo from "@/components/common/Logo";
 import { CONTACT, SERVICES_LIST } from "@/utils/constants";
 
-const CERTIFICATIONS = ["CAP Accredited", "ISO 15189", "NABL Accredited"];
+const CERTIFICATIONS = ["CAP Accredited", "DHA Approved"];
 const PAYMENT_METHODS = ["Visa", "Mastercard", "Apple Pay", "Cash"];
 const SITE_NAME = "ArogyaPlus Healthcare";
 const FOOTER_TEXT = "Your Health, Our Priority. Expert Home Care Services.";
@@ -63,9 +63,9 @@ export default function Footer() {
           <SectionHeading>Services</SectionHeading>
           <ul className="mt-4 space-y-3 text-sm text-slate-500">
             {SERVICES_LIST.map((service) => (
-              <li key={service} className="flex items-center justify-center gap-2 sm:justify-start">
+              <li key={service.label} className="flex items-center justify-center gap-2 sm:justify-start">
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-accent-500" aria-hidden="true" />
-                {service}
+                <Link to={service.href} className={LINK_CLASS}>{service.label}</Link>
               </li>
             ))}
           </ul>

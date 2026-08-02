@@ -8,6 +8,7 @@ import { getApiErrorMessage } from "@/services/api";
 import { uploadImage } from "@/services/uploadService";
 import type { Package } from "@/types/package";
 import type { Test } from "@/types/test";
+import { PACKAGE_CATEGORIES } from "@/utils/constants";
 import { packageFormSchema, type PackageFormValues } from "@/utils/validation";
 
 interface PackageFormModalProps {
@@ -28,6 +29,7 @@ const DEFAULTS: PackageFormValues = {
   original_lab_price: undefined,
   original_home_price: undefined,
   tat: "",
+  fasting_required: null,
   is_active: true,
   is_featured: false,
   test_ids: [],
@@ -49,6 +51,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
   } = useForm<PackageFormValues>({ resolver: zodResolver(packageFormSchema), defaultValues: DEFAULTS });
 
   const imageUrl = watch("image_url");
+  const fastingRequired = watch("fasting_required");
 
   useEffect(() => {
     if (!open) return;
@@ -65,6 +68,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
             original_lab_price: initialPackage.original_lab_price ?? undefined,
             original_home_price: initialPackage.original_home_price ?? undefined,
             tat: initialPackage.tat ?? "",
+            fasting_required: initialPackage.fasting_required ?? null,
             is_active: initialPackage.is_active,
             is_featured: initialPackage.is_featured,
             test_ids: initialPackage.tests.map((t) => t.id),
@@ -115,7 +119,10 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="form-label" htmlFor="pkg-category">Category</label>
-            <input id="pkg-category" className="form-input" {...register("category")} />
+            <input id="pkg-category" className="form-input" list="pkg-category-options" placeholder="Select or type a category" {...register("category")} />
+            <datalist id="pkg-category-options">
+              {PACKAGE_CATEGORIES.map((c) => <option key={c} value={c} />)}
+            </datalist>
           </div>
           <div>
             <label className="form-label" htmlFor="pkg-image">Icon Image</label>
@@ -163,6 +170,23 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
             <label className="form-label" htmlFor="pkg-tat">Report Time</label>
             <input id="pkg-tat" className="form-input" placeholder="e.g. 24 hours" {...register("tat")} />
           </div>
+        </div>
+
+        <div>
+          <label className="form-label" htmlFor="pkg-fasting">Fasting Requirement</label>
+          <select
+            id="pkg-fasting"
+            className="form-input"
+            value={fastingRequired === true ? "fasting_required" : fastingRequired === false ? "non_fasting" : ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              setValue("fasting_required", v === "fasting_required" ? true : v === "non_fasting" ? false : null);
+            }}
+          >
+            <option value="">— Not specified —</option>
+            <option value="fasting_required">Fasting Required</option>
+            <option value="non_fasting">Non Fasting</option>
+          </select>
         </div>
 
         <div>

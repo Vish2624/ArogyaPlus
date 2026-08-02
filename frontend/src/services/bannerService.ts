@@ -1,5 +1,6 @@
 import api from "./api";
 import type { Banner, BannerInput } from "@/types/banner";
+import type { PaginatedResponse } from "@/types/pagination";
 
 export async function listBanners(): Promise<Banner[]> {
   const { data } = await api.get<Banner[]>("/banners");
@@ -9,8 +10,8 @@ export async function listBanners(): Promise<Banner[]> {
 // --- Admin ---
 
 export async function adminListBanners(): Promise<Banner[]> {
-  const { data } = await api.get<Banner[]>("/admin/banners");
-  return data;
+  const { data } = await api.get<PaginatedResponse<Banner>>("/admin/banners", { params: { page_size: 10 } });
+  return data.items;
 }
 
 export async function adminCreateBanner(payload: BannerInput): Promise<Banner> {

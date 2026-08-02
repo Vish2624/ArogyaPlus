@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import ReorderableList from "@/components/admin/ReorderableList";
 import ErrorState from "@/components/common/ErrorState";
 import Spinner from "@/components/common/Spinner";
-import { adminGetPackage, adminReorderPackageTests, adminUpdatePackage } from "@/services/packageService";
+import { adminGetPackage, adminRemovePackageTest, adminReorderPackageTests } from "@/services/packageService";
 import { getApiErrorMessage } from "@/services/api";
 import type { Package } from "@/types/package";
 import type { Test } from "@/types/test";
@@ -39,8 +39,7 @@ export default function AdminPackageDetailPage() {
     if (!pkg) return;
     setRemovingId(testId);
     try {
-      const remainingIds = pkg.tests.filter((t) => t.id !== testId).map((t) => t.id);
-      const updated = await adminUpdatePackage(packageId, { test_ids: remainingIds });
+      const updated = await adminRemovePackageTest(packageId, testId);
       setPkg(updated);
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Could not remove this test."));

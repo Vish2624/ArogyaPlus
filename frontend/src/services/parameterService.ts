@@ -1,21 +1,22 @@
 import api from "./api";
 import type { Parameter, ParameterInput } from "@/types/parameter";
-import { DUMMY_PARAMETERS } from "@/utils/dummyParameters";
+import type { PaginatedResponse } from "@/types/pagination";
 
-/**
- * `/api/admin/parameters` doesn't exist on the live backend yet — fall back to a dummy
- * catalogue so the admin Parameters page can be reviewed end-to-end until it ships.
- */
+/** Returns the first page of parameters for use in form dropdowns and test editors. */
 export async function adminListParameters(search?: string): Promise<Parameter[]> {
-  let data: Parameter[];
-  try {
-    ({ data } = await api.get<Parameter[]>("/admin/parameters", { params: search ? { search } : undefined }));
-  } catch {
-    data = DUMMY_PARAMETERS;
-  }
-  if (!search) return data;
-  const q = search.trim().toLowerCase();
-  return data.filter((p) => p.name.toLowerCase().includes(q));
+  const { data } = await api.get<PaginatedResponse<Parameter>>("/admin/parameters", {
+    params: { page_size: 10, ...(search ? { search } : {}) },
+  });
+  return data.items;
+}
+
+export async function adminListParametersPaginated(params: {
+  search?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<PaginatedResponse<Parameter>> {
+  const { data } = await api.get<PaginatedResponse<Parameter>>("/admin/parameters", { params });
+  return data;
 }
 
 export async function adminGetParameter(id: number): Promise<Parameter> {

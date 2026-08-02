@@ -22,7 +22,7 @@ export default function CertifiedLabs() {
           {CERTIFICATIONS.map((cert, index) => (
             <div
               key={`${cert.title}-${index}`}
-              className="card p-8 text-center hover:-translate-y-1 hover:scale-[1.02] hover:shadow-hover hover:ring-primary-500/40"
+              className="card p-8 text-center hover:-translate-y-0.5 hover:shadow-hover hover:ring-primary-500/40"
             >
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary-700 ring-4 ring-primary-50">
                 <EmojiIcon emoji={cert.icon} className="h-6 w-6" />

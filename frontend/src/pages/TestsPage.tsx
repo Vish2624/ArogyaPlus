@@ -7,7 +7,6 @@ import ErrorState from "@/components/common/ErrorState";
 import LabArtworkBackdrop from "@/components/home/LabArtworkBackdrop";
 import TestCard from "@/components/tests/TestCard";
 import TestCardSkeleton from "@/components/tests/TestCardSkeleton";
-import TestDetailModal from "@/components/tests/TestDetailModal";
 import TestSearchAutocomplete from "@/components/tests/TestSearchAutocomplete";
 import { getApiErrorMessage } from "@/services/api";
 import { listTests } from "@/services/testService";
@@ -15,7 +14,6 @@ import type { Test } from "@/types/test";
 
 export default function TestsPage() {
   const [tests, setTests] = useState<Test[]>([]);
-  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -134,14 +132,13 @@ export default function TestsPage() {
             </p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {tests.map((test) => (
-                <TestCard key={test.id} test={test} onViewDetails={setSelectedTest} />
+                <TestCard key={test.id} test={test} />
               ))}
             </div>
           </>
         )}
       </div>
 
-      <TestDetailModal test={selectedTest} onClose={() => setSelectedTest(null)} />
     </div>
   );
 }

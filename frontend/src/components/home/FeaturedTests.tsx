@@ -6,10 +6,9 @@ import type { Test } from "@/types/test";
 
 interface FeaturedTestsProps {
   tests: Test[];
-  onViewDetails: (test: Test) => void;
 }
 
-export default function FeaturedTests({ tests, onViewDetails }: FeaturedTestsProps) {
+export default function FeaturedTests({ tests }: FeaturedTestsProps) {
   if (tests.length === 0) return null;
 
   return (
@@ -28,7 +27,7 @@ export default function FeaturedTests({ tests, onViewDetails }: FeaturedTestsPro
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {tests.map((test) => (
-            <TestCard key={test.id} test={test} onViewDetails={onViewDetails} />
+            <TestCard key={test.id} test={test} />
           ))}
         </div>
 

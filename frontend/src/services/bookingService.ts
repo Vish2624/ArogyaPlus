@@ -1,5 +1,6 @@
 import api from "./api";
 import type { Booking, BookingCreatePayload, BookingCreatedResponse, BookingStatus, DashboardStats } from "@/types/booking";
+import type { PaginatedResponse } from "@/types/pagination";
 
 /**
  * Like packages/tests, the live backend serializes decimal fields (`total_amount`,
@@ -26,11 +27,13 @@ export interface AdminBookingQuery {
   status_filter?: BookingStatus;
   booking_date?: string;
   search?: string;
+  page?: number;
+  page_size?: number;
 }
 
-export async function adminListBookings(query: AdminBookingQuery = {}): Promise<Booking[]> {
-  const { data } = await api.get<Booking[]>("/admin/bookings", { params: query });
-  return data.map(normalizeBooking);
+export async function adminListBookings(query: AdminBookingQuery = {}): Promise<PaginatedResponse<Booking>> {
+  const { data } = await api.get<PaginatedResponse<Booking>>("/admin/bookings", { params: query });
+  return { ...data, items: data.items.map(normalizeBooking) };
 }
 
 export async function adminGetBooking(id: number): Promise<Booking> {

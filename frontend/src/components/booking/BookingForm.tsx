@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
-import { Clock, MapPin, User } from "lucide-react";
+import { Clock, MapPin, Wallet } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import VisitModeSelector from "@/components/booking/VisitModeSelector";
+import PaymentModeSelector from "@/components/booking/PaymentModeSelector";
 import TimeSlotPicker from "@/components/booking/TimeSlotPicker";
 import { createBooking } from "@/services/bookingService";
 import { getApiErrorMessage } from "@/services/api";
@@ -21,6 +22,8 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
   const items = useCartStore((s) => s.items);
   const visitMode = useCartStore((s) => s.visitMode);
   const setVisitMode = useCartStore((s) => s.setVisitMode);
+  const addHomeCollection = useCartStore((s) => s.addHomeCollection);
+  const removeHomeCollection = useCartStore((s) => s.removeHomeCollection);
   const clearCart = useCartStore((s) => s.clearCart);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -35,19 +38,23 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
       customer_name: "",
+      country_code: "+971",
       phone: "",
       email: "",
       address: "",
       preferred_date: todayISODate(),
       visit_mode: visitMode,
+      payment_mode: "cash",
     },
   });
 
   const onSubmit = async (values: BookingFormValues) => {
     setSubmitError(null);
     try {
+      const { country_code, phone, ...rest } = values;
       const response = await createBooking({
-        ...values,
+        ...rest,
+        phone: `${country_code}${phone}`,
         items: items.map((item) => ({ item_type: item.type, item_id: item.id })),
       });
       clearCart();
@@ -73,6 +80,11 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
               onChange={(mode) => {
                 field.onChange(mode);
                 setVisitMode(mode);
+                if (mode === "home") {
+                  addHomeCollection();
+                } else {
+                  removeHomeCollection();
+                }
               }}
             />
           )}
@@ -80,10 +92,19 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
       </div>
 
       <div className="border-t border-slate-100 pt-6">
-        <span className="form-label mb-3 flex items-center gap-1.5">
-          <User className="h-3.5 w-3.5" aria-hidden="true" />
-          Your Details
+        <span className="form-label flex items-center gap-1.5">
+          <Wallet className="h-3.5 w-3.5" aria-hidden="true" />
+          Payment Mode
         </span>
+        <Controller
+          name="payment_mode"
+          control={control}
+          render={({ field }) => <PaymentModeSelector value={field.value} onChange={field.onChange} />}
+        />
+        {errors.payment_mode && <p className="form-error">{errors.payment_mode.message}</p>}
+      </div>
+
+      <div className="border-t border-slate-100 pt-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="customer_name" className="form-label">Full Name</label>
@@ -112,8 +133,29 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
 
         <div>
           <label htmlFor="phone" className="form-label">Phone Number</label>
-          <input id="phone" type="tel" className="form-input" placeholder="e.g. 501234567" {...register("phone")} />
-          {errors.phone && <p className="form-error">{errors.phone.message}</p>}
+          <div className="flex items-stretch overflow-hidden rounded-input border border-slate-300 bg-white focus-within:border-primary-600 focus-within:ring-1 focus-within:ring-primary-600">
+            <input
+              id="country_code"
+              type="text"
+              inputMode="tel"
+              autoComplete="off"
+              className="w-16 shrink-0 border-0 bg-transparent px-3.5 py-2.5 text-center text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-0"
+              placeholder="+971"
+              {...register("country_code")}
+            />
+            <span className="my-2.5 w-px shrink-0 bg-slate-300" aria-hidden="true" />
+            <input
+              id="phone"
+              type="tel"
+              autoComplete="off"
+              className="min-w-0 flex-1 border-0 bg-transparent px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-0"
+              placeholder="501234567"
+              {...register("phone")}
+            />
+          </div>
+          {(errors.country_code || errors.phone) && (
+            <p className="form-error">{errors.country_code?.message ?? errors.phone?.message}</p>
+          )}
         </div>
 
         <div className="sm:col-span-2">
@@ -131,8 +173,8 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
           </p>
           <textarea
             id="address"
-            rows={2}
-            className="form-input resize-none"
+            rows={3}
+            className="form-input resize-none rounded-2xl"
             placeholder="e.g. Villa 12, Al Wasl Road, Jumeirah, Dubai"
             {...register("address")}
           />

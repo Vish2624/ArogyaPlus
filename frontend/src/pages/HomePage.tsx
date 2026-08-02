@@ -15,21 +15,19 @@ import Testimonials from "@/components/home/Testimonials";
 import TrustStrip from "@/components/home/TrustStrip";
 import PackageDetailModal from "@/components/packages/PackageDetailModal";
 import PromoCardCarousel from "@/components/home/PromoCardCarousel";
-import TestDetailModal from "@/components/tests/TestDetailModal";
 import { listBanners } from "@/services/bannerService";
 import { getApiErrorMessage } from "@/services/api";
 import { listPackages } from "@/services/packageService";
 import { listTests } from "@/services/testService";
 import type { Banner } from "@/types/banner";
 import type { Package } from "@/types/package";
-import type { Test } from "@/types/test";
+import type { Test } from "@/types/test"; // still needed for tests state
 
 export default function HomePage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,7 +68,7 @@ export default function HomePage() {
       <StatsBanner />
       <TrustStrip />
       <PackageCarousel packages={packages.slice(0, 6)} onViewDetails={setSelectedPackage} />
-      <FeaturedTests tests={tests.slice(0, 9)} onViewDetails={setSelectedTest} />
+      <FeaturedTests tests={tests.slice(0, 9)} />
       <ArtworkBanner />
       <HowItWorks />
       <Testimonials />
@@ -79,7 +77,6 @@ export default function HomePage() {
       <PromoCardCarousel />
       <CTABanner />
       <PackageDetailModal pkg={selectedPackage} onClose={() => setSelectedPackage(null)} />
-      <TestDetailModal test={selectedTest} onClose={() => setSelectedTest(null)} />
     </>
   );
 }

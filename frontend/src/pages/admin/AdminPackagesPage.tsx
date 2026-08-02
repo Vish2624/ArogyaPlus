@@ -137,6 +137,11 @@ export default function AdminPackagesPage() {
           <EmptyState title="No packages yet" description="Add your first health package to get started." />
         )}
         {!loading && !error && packages.length > 0 && (
+          <>
+            <p className="mb-3 text-sm text-slate-500">
+              Showing <span className="font-semibold text-slate-700">{packages.length}</span>{" "}
+              {packages.length === 1 ? "package" : "packages"}
+            </p>
           <div className="card overflow-x-auto p-2">
             <table className="w-full text-left text-sm">
               <thead>
@@ -206,6 +211,7 @@ export default function AdminPackagesPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
