@@ -68,7 +68,7 @@ export default function QuickSearchBar({ compact = false, closeSignal, onActiveC
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-card border border-white/10 bg-white/5 p-3 shadow-glass backdrop-blur-2xl sm:flex-row sm:items-center sm:p-3.5"
+      className="flex flex-col gap-2 rounded-3xl border border-white/10 bg-white/5 p-2 shadow-glass backdrop-blur-2xl sm:gap-3 sm:rounded-card sm:p-3.5 sm:flex-row sm:items-center"
     >
       <SearchAutocomplete
         value={query}
@@ -77,27 +77,27 @@ export default function QuickSearchBar({ compact = false, closeSignal, onActiveC
         onSelect={handleSelectSuggestion}
         placeholder="Search health packages, tests..."
         className="flex-1"
-        inputClassName="h-[58px] w-full rounded-input border border-white/40 bg-primary-950/40 pl-11 pr-3 text-sm text-white placeholder:text-white/60 shadow-lg shadow-black/10 backdrop-blur-md focus:border-white/70 focus:outline-none focus:ring-1 focus:ring-white/70"
-        iconClassName="left-4 h-5 w-5 text-white/70"
+        inputClassName="h-11 w-full rounded-input border border-white/40 bg-primary-950/40 pl-10 pr-3 text-sm text-white placeholder:text-white/60 shadow-lg shadow-black/10 backdrop-blur-md focus:border-white/70 focus:outline-none focus:ring-1 focus:ring-white/70 sm:h-[58px] sm:pl-11"
+        iconClassName="left-3.5 h-4 w-4 text-white/70 sm:left-4 sm:h-5 sm:w-5"
         emptyLabel="No matches. Try a different spelling."
         closeSignal={closeSignal}
         onActiveChange={onActiveChange}
       />
-      <div className="grid grid-cols-2 gap-3 sm:flex">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
         <button
           type="button"
           onClick={() => goTo("/packages")}
-          className="flex items-center justify-center gap-2 rounded-input border border-white bg-primary-700 px-5 text-sm font-bold text-white shadow-lg shadow-primary-900/30 transition-all duration-[250ms] hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 sm:h-[58px]"
+          className="flex h-11 items-center justify-center gap-1.5 rounded-input border border-white bg-primary-700 px-3 text-xs font-bold text-white shadow-lg shadow-primary-900/30 transition-all duration-[250ms] hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 sm:h-[58px] sm:gap-2 sm:px-5 sm:text-sm"
         >
-          <PackageIcon className="h-4 w-4" aria-hidden="true" />
+          <PackageIcon className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" aria-hidden="true" />
           Packages
         </button>
         <button
           type="button"
           onClick={() => goTo("/tests")}
-          className="flex items-center justify-center gap-2 rounded-input border border-white bg-primary-700 px-5 text-sm font-bold text-white shadow-lg shadow-primary-900/30 transition-all duration-[250ms] hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 sm:h-[58px]"
+          className="flex h-11 items-center justify-center gap-1.5 rounded-input border border-white bg-primary-700 px-3 text-xs font-bold text-white shadow-lg shadow-primary-900/30 transition-all duration-[250ms] hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 sm:h-[58px] sm:gap-2 sm:px-5 sm:text-sm"
         >
-          <FlaskConical className="h-4 w-4" aria-hidden="true" />
+          <FlaskConical className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" aria-hidden="true" />
           Lab Tests
         </button>
       </div>

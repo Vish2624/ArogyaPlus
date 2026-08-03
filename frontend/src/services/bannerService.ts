@@ -9,9 +9,20 @@ export async function listBanners(): Promise<Banner[]> {
 
 // --- Admin ---
 
+/**
+ * Walks every page rather than trusting a single large `page_size` request, since the backend
+ * may cap it below what's asked for.
+ */
 export async function adminListBanners(): Promise<Banner[]> {
-  const { data } = await api.get<PaginatedResponse<Banner>>("/admin/banners", { params: { page_size: 10 } });
-  return data.items;
+  const all: Banner[] = [];
+  let page = 1;
+  for (;;) {
+    const { data } = await api.get<PaginatedResponse<Banner>>("/admin/banners", { params: { page, page_size: 500 } });
+    all.push(...data.items);
+    if (data.items.length === 0 || page >= data.total_pages) break;
+    page += 1;
+  }
+  return all;
 }
 
 export async function adminCreateBanner(payload: BannerInput): Promise<Banner> {

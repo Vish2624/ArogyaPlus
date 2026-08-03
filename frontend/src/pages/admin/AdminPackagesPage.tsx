@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import PackageFormModal from "@/components/admin/PackageFormModal";
 import EmptyState from "@/components/common/EmptyState";
 import ErrorState from "@/components/common/ErrorState";
+import Pagination from "@/components/common/Pagination";
 import Spinner from "@/components/common/Spinner";
 import { getApiErrorMessage } from "@/services/api";
 import {
@@ -20,6 +21,8 @@ import type { Test } from "@/types/test";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackageFormValues } from "@/utils/validation";
 
+const PAGE_SIZE = 20;
+
 export default function AdminPackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [allTests, setAllTests] = useState<Test[]>([]);
@@ -29,6 +32,15 @@ export default function AdminPackagesPage() {
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   const [dragId, setDragId] = useState<number | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(packages.length / PAGE_SIZE));
+  const pagePackages = packages.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [packages.length]);
 
   const loadData = async () => {
     setLoading(true);
@@ -157,7 +169,7 @@ export default function AdminPackagesPage() {
                 </tr>
               </thead>
               <tbody>
-                {packages.map((pkg) => (
+                {pagePackages.map((pkg) => (
                   <tr
                     key={pkg.id}
                     draggable
@@ -211,6 +223,13 @@ export default function AdminPackagesPage() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalRows={packages.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
           </>
         )}
       </div>

@@ -45,9 +45,20 @@ export async function getPackage(id: number): Promise<Package> {
 
 // --- Admin ---
 
+/**
+ * Walks every page rather than trusting a single large `page_size` request, since the backend
+ * may cap it below what's asked for.
+ */
 export async function adminListPackages(): Promise<Package[]> {
-  const { data } = await api.get<PaginatedResponse<Package>>("/admin/packages", { params: { page_size: 10 } });
-  return data.items.map(normalizePackage).sort(byDisplayOrder);
+  const all: Package[] = [];
+  let page = 1;
+  for (;;) {
+    const { data } = await api.get<PaginatedResponse<Package>>("/admin/packages", { params: { page, page_size: 500 } });
+    all.push(...data.items);
+    if (data.items.length === 0 || page >= data.total_pages) break;
+    page += 1;
+  }
+  return all.map(normalizePackage).sort(byDisplayOrder);
 }
 
 export async function adminGetPackage(id: number): Promise<Package> {
