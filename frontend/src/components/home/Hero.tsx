@@ -33,12 +33,25 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
 
   const slideCount = 1 + banners.length;
   const [slide, setSlide] = useState(0);
+  const [searchActive, setSearchActive] = useState(false);
 
   useEffect(() => {
-    if (slideCount < 2) return;
+    if (slideCount < 2 || searchActive) return;
     const timer = setInterval(() => setSlide((s) => (s + 1) % slideCount), AUTO_ADVANCE_MS);
     return () => clearInterval(timer);
-  }, [slideCount]);
+  }, [slideCount, searchActive]);
+
+  // Scrolling away counts as leaving the search bar even if it's still technically focused
+  // (e.g. mobile keyboard still open) - resume auto-advance once that happens.
+  useEffect(() => {
+    if (!searchActive) return;
+    const handleScroll = () => {
+      setSearchActive(false);
+      (document.activeElement as HTMLElement | null)?.blur?.();
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [searchActive]);
 
   const goTo = (next: number) => setSlide((next + slideCount) % slideCount);
   const banner = slide === 0 ? null : banners[slide - 1];
@@ -60,7 +73,7 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
       <div className="container-page relative pb-16 pt-10 sm:pb-20 sm:pt-14 lg:pt-16">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
           <div className="order-2 flex flex-col justify-center lg:order-1">
-            <div key={`text-${slide}`} className="hero-slide-fade will-change-transform">
+            <div key={`text-${slide}`} className="hero-slide-fade min-h-[230px] will-change-transform sm:min-h-[250px] lg:min-h-[270px]">
               {!banner ? (
                 <>
                   <span className="eyebrow inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-[10px] text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm">
@@ -116,7 +129,7 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
             </div>
 
             <div className="relative z-10 mt-6 max-w-xl">
-              <QuickSearchBar />
+              <QuickSearchBar closeSignal={slide} onActiveChange={setSearchActive} />
             </div>
           </div>
 

@@ -10,13 +10,17 @@ import { listTests } from "@/services/testService";
 
 interface QuickSearchBarProps {
   compact?: boolean;
+  /** Change this value (e.g. the active hero slide index) to force the results dropdown closed. */
+  closeSignal?: number | string;
+  /** Fires true while the search input is focused, false once it's blurred. */
+  onActiveChange?: (active: boolean) => void;
 }
 
 interface CombinedSuggestion extends AutocompleteSuggestion {
   kind: "package" | "test";
 }
 
-export default function QuickSearchBar({ compact = false }: QuickSearchBarProps) {
+export default function QuickSearchBar({ compact = false, closeSignal, onActiveChange }: QuickSearchBarProps) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<CombinedSuggestion[]>([]);
   const navigate = useNavigate();
@@ -76,6 +80,8 @@ export default function QuickSearchBar({ compact = false }: QuickSearchBarProps)
         inputClassName="h-[58px] w-full rounded-input border border-white/40 bg-primary-950/40 pl-11 pr-3 text-sm text-white placeholder:text-white/60 shadow-lg shadow-black/10 backdrop-blur-md focus:border-white/70 focus:outline-none focus:ring-1 focus:ring-white/70"
         iconClassName="left-4 h-5 w-5 text-white/70"
         emptyLabel="No matches. Try a different spelling."
+        closeSignal={closeSignal}
+        onActiveChange={onActiveChange}
       />
       <div className="grid grid-cols-2 gap-3 sm:flex">
         <button

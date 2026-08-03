@@ -21,6 +21,10 @@ interface SearchAutocompleteProps<T extends AutocompleteSuggestion> {
   inputClassName?: string;
   iconClassName?: string;
   emptyLabel?: string;
+  /** Change this value (e.g. a slide index) to force the dropdown closed, such as when content around the input reflows. */
+  closeSignal?: number | string;
+  /** Fires true when the input gains focus and false when it loses focus (clicking a suggestion doesn't blur it). */
+  onActiveChange?: (active: boolean) => void;
 }
 
 export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
@@ -33,6 +37,8 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
   inputClassName = "form-input pl-10",
   iconClassName = "left-3.5 h-4 w-4 text-slate-500",
   emptyLabel = "No matches. Try a different spelling.",
+  closeSignal,
+  onActiveChange,
 }: SearchAutocompleteProps<T>) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -58,6 +64,11 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  // Closes on any layout shift the dropdown can't track on its own (auto-sliding hero content, etc).
+  useEffect(() => {
+    setOpen(false);
+  }, [closeSignal]);
+
   const updateRect = () => {
     const el = wrapperRef.current;
     if (!el) return;
@@ -68,10 +79,13 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
   useLayoutEffect(() => {
     if (!showDropdown) return;
     updateRect();
-    window.addEventListener("scroll", updateRect, true);
+    // Scrolling closes the dropdown outright rather than chasing the anchor's new position -
+    // repositioning lagged behind fast scrolls and left a detached list floating on screen.
+    const close = () => setOpen(false);
+    window.addEventListener("scroll", close, true);
     window.addEventListener("resize", updateRect);
     return () => {
-      window.removeEventListener("scroll", updateRect, true);
+      window.removeEventListener("scroll", close, true);
       window.removeEventListener("resize", updateRect);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -141,7 +155,11 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
           onChange(e.target.value);
           setOpen(true);
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setOpen(true);
+          onActiveChange?.(true);
+        }}
+        onBlur={() => onActiveChange?.(false)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         role="combobox"
