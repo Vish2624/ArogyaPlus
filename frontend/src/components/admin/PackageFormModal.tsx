@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
+import { Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -39,6 +40,8 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [testSearch, setTestSearch] = useState("");
+  const [pinnedTestIds, setPinnedTestIds] = useState<Set<number>>(new Set());
 
   const {
     register,
@@ -56,6 +59,8 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
   useEffect(() => {
     if (!open) return;
     setSubmitError(null);
+    setTestSearch("");
+    setPinnedTestIds(new Set(initialPackage?.tests.map((t) => t.id) ?? []));
     reset(
       initialPackage
         ? {
@@ -76,6 +81,25 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
         : DEFAULTS
     );
   }, [open, initialPackage, reset]);
+
+  const fullTestList = useMemo(() => {
+    const byId = new Map(allTests.map((t) => [t.id, t]));
+    for (const t of initialPackage?.tests ?? []) {
+      if (!byId.has(t.id)) byId.set(t.id, t);
+    }
+    return Array.from(byId.values());
+  }, [allTests, initialPackage]);
+
+  const filteredTests = useMemo(() => {
+    const term = testSearch.trim().toLowerCase();
+    const list = term ? fullTestList.filter((t) => t.name.toLowerCase().includes(term)) : fullTestList;
+    return [...list].sort((a, b) => {
+      const aPinned = pinnedTestIds.has(a.id);
+      const bPinned = pinnedTestIds.has(b.id);
+      if (aPinned !== bPinned) return aPinned ? -1 : 1;
+      return 0;
+    });
+  }, [fullTestList, testSearch, pinnedTestIds]);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -191,13 +215,26 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
 
         <div>
           <span className="form-label">Included Tests</span>
+          <div className="relative mb-2">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input
+              type="text"
+              value={testSearch}
+              onChange={(e) => setTestSearch(e.target.value)}
+              placeholder="Search tests..."
+              className="form-input pl-9"
+            />
+          </div>
           <Controller
             name="test_ids"
             control={control}
             render={({ field }) => (
               <div className="max-h-44 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-3">
-                {allTests.length === 0 && <p className="text-xs text-slate-500">No tests available yet.</p>}
-                {allTests.map((test) => {
+                {fullTestList.length === 0 && <p className="text-xs text-slate-500">No tests available yet.</p>}
+                {fullTestList.length > 0 && filteredTests.length === 0 && (
+                  <p className="text-xs text-slate-500">No tests match your search.</p>
+                )}
+                {filteredTests.map((test) => {
                   const checked = field.value.includes(test.id);
                   return (
                     <label key={test.id} className="flex items-center gap-2 text-sm text-slate-700">

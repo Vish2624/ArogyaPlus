@@ -2,10 +2,10 @@ import api from "./api";
 import type { Parameter, ParameterInput } from "@/types/parameter";
 import type { PaginatedResponse } from "@/types/pagination";
 
-/** Returns the first page of parameters for use in form dropdowns and test editors. */
+/** Returns the full parameter catalog for use in form dropdowns and test editors. */
 export async function adminListParameters(search?: string): Promise<Parameter[]> {
   const { data } = await api.get<PaginatedResponse<Parameter>>("/admin/parameters", {
-    params: { page_size: 10, ...(search ? { search } : {}) },
+    params: { page_size: 500, ...(search ? { search } : {}) },
   });
   return data.items;
 }

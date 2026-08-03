@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import ParameterFormModal from "@/components/admin/ParameterFormModal";
@@ -22,6 +22,7 @@ export default function AdminParametersPage() {
   const [parameters, setParameters] = useState<Parameter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
@@ -32,7 +33,11 @@ export default function AdminParametersPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await adminListParametersPaginated({ page, page_size: PAGE_SIZE });
+      const result = await adminListParametersPaginated({
+        search: search || undefined,
+        page,
+        page_size: PAGE_SIZE,
+      });
       setParameters(result.items);
       setTotalPages(result.total_pages);
       setTotalRows(result.total_rows);
@@ -44,9 +49,11 @@ export default function AdminParametersPage() {
   };
 
   useEffect(() => {
-    loadParameters();
+    const delay = search ? 300 : 0;
+    const timeout = setTimeout(loadParameters, delay);
+    return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [search, page]);
 
   const openAddModal = () => {
     setEditingParameter(null);
@@ -103,11 +110,25 @@ export default function AdminParametersPage() {
         </button>
       </div>
 
-      <div className="mt-6">
+      <div className="relative mt-6 sm:max-w-sm">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Search parameters by name..."
+          className="form-input pl-10"
+        />
+      </div>
+
+      <div className="mt-4">
         {loading && <Spinner label="Loading parameters..." />}
         {!loading && error && <ErrorState message={error} onRetry={loadParameters} />}
         {!loading && !error && parameters.length === 0 && (
-          <EmptyState title="No parameters yet" description="Add your first clinical parameter to get started." />
+          <EmptyState
+            title={search ? "No matching parameters" : "No parameters yet"}
+            description={search ? "Try a different search term." : "Add your first clinical parameter to get started."}
+          />
         )}
         {!loading && !error && parameters.length > 0 && (
           <>

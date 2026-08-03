@@ -41,7 +41,7 @@ export async function getTest(id: number): Promise<Test> {
 // --- Admin ---
 
 export async function adminListTests(): Promise<Test[]> {
-  const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params: { page_size: 10 } });
+  const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params: { page_size: 500 } });
   return data.items.map(normalizeTest).sort(byDisplayOrder);
 }
 

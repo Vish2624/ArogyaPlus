@@ -44,6 +44,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
   const [catalog, setCatalog] = useState<Parameter[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [pinnedIds, setPinnedIds] = useState<Set<number>>(new Set());
   const [paramSearch, setParamSearch] = useState("");
   const [paramError, setParamError] = useState(false);
 
@@ -64,7 +65,9 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
     setSubmitError(null);
     setParamSearch("");
     setParamError(false);
-    setSelectedIds(new Set(initialTest?.parameters.map((p) => p.id) ?? []));
+    const initialIds = new Set(initialTest?.parameters.map((p) => p.id) ?? []);
+    setSelectedIds(initialIds);
+    setPinnedIds(initialIds);
     reset(
       initialTest
         ? {
@@ -93,11 +96,24 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
       .finally(() => setCatalogLoading(false));
   }, [open]);
 
+  const fullCatalog = useMemo(() => {
+    const byId = new Map(catalog.map((p) => [p.id, p]));
+    for (const p of initialTest?.parameters ?? []) {
+      if (!byId.has(p.id)) byId.set(p.id, p);
+    }
+    return Array.from(byId.values());
+  }, [catalog, initialTest]);
+
   const filteredCatalog = useMemo(() => {
     const term = paramSearch.trim().toLowerCase();
-    if (!term) return catalog;
-    return catalog.filter((p) => p.name.toLowerCase().includes(term));
-  }, [catalog, paramSearch]);
+    const list = term ? fullCatalog.filter((p) => p.name.toLowerCase().includes(term)) : fullCatalog;
+    return [...list].sort((a, b) => {
+      const aPinned = pinnedIds.has(a.id);
+      const bPinned = pinnedIds.has(b.id);
+      if (aPinned !== bPinned) return aPinned ? -1 : 1;
+      return 0;
+    });
+  }, [fullCatalog, paramSearch, pinnedIds]);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
