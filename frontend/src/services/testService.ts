@@ -40,9 +40,20 @@ export async function getTest(id: number): Promise<Test> {
 
 // --- Admin ---
 
+/**
+ * Walks every page rather than trusting a single large `page_size` request, since the backend
+ * may cap it below what's asked for.
+ */
 export async function adminListTests(): Promise<Test[]> {
-  const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params: { page_size: 500 } });
-  return data.items.map(normalizeTest).sort(byDisplayOrder);
+  const all: Test[] = [];
+  let page = 1;
+  for (;;) {
+    const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params: { page, page_size: 500 } });
+    all.push(...data.items);
+    if (data.items.length === 0 || page >= data.total_pages) break;
+    page += 1;
+  }
+  return all.map(normalizeTest).sort(byDisplayOrder);
 }
 
 export async function adminGetTest(id: number): Promise<Test> {
