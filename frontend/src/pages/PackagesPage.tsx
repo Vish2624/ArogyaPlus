@@ -1,20 +1,25 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import EmptyState from "@/components/common/EmptyState";
 import ErrorState from "@/components/common/ErrorState";
+import Pagination from "@/components/common/Pagination";
 import LabArtworkBackdrop from "@/components/home/LabArtworkBackdrop";
 import PackageCard from "@/components/packages/PackageCard";
 import PackageCardSkeleton from "@/components/packages/PackageCardSkeleton";
 import PackageDetailModal from "@/components/packages/PackageDetailModal";
 import PackageSearchAutocomplete from "@/components/packages/PackageSearchAutocomplete";
 import { getApiErrorMessage } from "@/services/api";
-import { listPackages } from "@/services/packageService";
+import { listPackages, listPackagesPaginated } from "@/services/packageService";
 import type { Package } from "@/types/package";
+
+const PAGE_SIZE = 9;
 
 export default function PackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,17 +28,24 @@ export default function PackagesPage() {
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState<"price_asc" | "price_desc" | "">("");
+  const [page, setPage] = useState(1);
+
+  const [allCategories, setAllCategories] = useState<string[]>([]);
 
   const loadPackages = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listPackages({
+      const data = await listPackagesPaginated({
         search: search || undefined,
         category: category || undefined,
         sort: sort || undefined,
+        page,
+        page_size: PAGE_SIZE,
       });
-      setPackages(data);
+      setPackages(data.items);
+      setTotalPages(data.total_pages);
+      setTotalRows(data.total_rows);
     } catch (err) {
       setError(getApiErrorMessage(err, "We couldn't load the packages catalogue. Please try again."));
     } finally {
@@ -43,20 +55,31 @@ export default function PackagesPage() {
 
   useEffect(() => {
     const param = searchParams.get("search");
-    if (param !== null) setSearch(param);
+    if (param !== null) {
+      setSearch(param);
+      setPage(1);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
-    const timeout = setTimeout(loadPackages, 300);
+    const delay = search ? 300 : 0;
+    const timeout = setTimeout(loadPackages, delay);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, sort]);
+  }, [search, category, sort, page]);
 
-  const categories = useMemo(
-    () => Array.from(new Set(packages.map((p) => p.category).filter((c): c is string => Boolean(c)))),
-    [packages]
-  );
+  // One-time full-catalogue fetch just to derive the category chip list, decoupled from the
+  // paginated grid fetch above so switching pages never re-triggers it.
+  useEffect(() => {
+    listPackages()
+      .then((all) => {
+        setAllCategories(Array.from(new Set(all.map((p) => p.category).filter((c): c is string => Boolean(c)))));
+      })
+      .catch(() => {
+        // Best-effort — category chips just won't render if this fails.
+      });
+  }, []);
 
   return (
     <div className="section container-page">
@@ -72,12 +95,22 @@ export default function PackagesPage() {
       </div>
 
       <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-        <PackageSearchAutocomplete value={search} onChange={setSearch} className="flex-1" />
+        <PackageSearchAutocomplete
+          value={search}
+          onChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          className="flex-1"
+        />
 
         <div className="relative sm:w-52">
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as typeof sort)}
+            onChange={(e) => {
+              setSort(e.target.value as typeof sort);
+              setPage(1);
+            }}
             className="form-input w-full appearance-none pr-9"
           >
             <option value="">Sort by</option>
@@ -88,22 +121,28 @@ export default function PackagesPage() {
         </div>
       </div>
 
-      {categories.length > 0 && (
+      {allCategories.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => setCategory("")}
+            onClick={() => {
+              setCategory("");
+              setPage(1);
+            }}
             className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors duration-[250ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
               category === "" ? "bg-primary-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-primary-50 hover:text-primary-700"
             }`}
           >
             All Categories
           </button>
-          {categories.map((c) => (
+          {allCategories.map((c) => (
             <button
               key={c}
               type="button"
-              onClick={() => setCategory(c)}
+              onClick={() => {
+                setCategory(c);
+                setPage(1);
+              }}
               className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors duration-[250ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 category === c ? "bg-primary-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-primary-50 hover:text-primary-700"
               }`}
@@ -129,14 +168,22 @@ export default function PackagesPage() {
         {!loading && !error && packages.length > 0 && (
           <>
             <p className="mb-4 text-sm text-slate-500">
-              Showing <span className="font-semibold text-slate-700">{packages.length}</span>{" "}
-              {packages.length === 1 ? "package" : "packages"}
+              Showing <span className="font-semibold text-slate-700">{packages.length}</span> of{" "}
+              <span className="font-semibold text-slate-700">{totalRows}</span>{" "}
+              {totalRows === 1 ? "package" : "packages"}
             </p>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {packages.map((pkg) => (
                 <PackageCard key={pkg.id} pkg={pkg} onViewDetails={setSelectedPackage} />
               ))}
             </div>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalRows={totalRows}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
           </>
         )}
       </div>

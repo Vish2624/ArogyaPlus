@@ -1,19 +1,24 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import EmptyState from "@/components/common/EmptyState";
 import ErrorState from "@/components/common/ErrorState";
+import Pagination from "@/components/common/Pagination";
 import LabArtworkBackdrop from "@/components/home/LabArtworkBackdrop";
 import TestCard from "@/components/tests/TestCard";
 import TestCardSkeleton from "@/components/tests/TestCardSkeleton";
 import TestSearchAutocomplete from "@/components/tests/TestSearchAutocomplete";
 import { getApiErrorMessage } from "@/services/api";
-import { listTests } from "@/services/testService";
+import { listTests, listTestsPaginated } from "@/services/testService";
 import type { Test } from "@/types/test";
+
+const PAGE_SIZE = 9;
 
 export default function TestsPage() {
   const [tests, setTests] = useState<Test[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,17 +26,24 @@ export default function TestsPage() {
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState<"price_asc" | "price_desc" | "">("");
+  const [page, setPage] = useState(1);
+
+  const [allCategories, setAllCategories] = useState<string[]>([]);
 
   const loadTests = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listTests({
+      const data = await listTestsPaginated({
         search: search || undefined,
         category: category || undefined,
         sort: sort || undefined,
+        page,
+        page_size: PAGE_SIZE,
       });
-      setTests(data);
+      setTests(data.items);
+      setTotalPages(data.total_pages);
+      setTotalRows(data.total_rows);
     } catch (err) {
       setError(getApiErrorMessage(err, "We couldn't load the test catalogue. Please try again."));
     } finally {
@@ -41,20 +53,31 @@ export default function TestsPage() {
 
   useEffect(() => {
     const param = searchParams.get("search");
-    if (param !== null) setSearch(param);
+    if (param !== null) {
+      setSearch(param);
+      setPage(1);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
-    const timeout = setTimeout(loadTests, 300);
+    const delay = search ? 300 : 0;
+    const timeout = setTimeout(loadTests, delay);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, sort]);
+  }, [search, category, sort, page]);
 
-  const categories = useMemo(
-    () => Array.from(new Set(tests.map((t) => t.category).filter((c): c is string => Boolean(c)))),
-    [tests]
-  );
+  // One-time full-catalogue fetch just to derive the category chip list, decoupled from the
+  // paginated grid fetch above so switching pages never re-triggers it.
+  useEffect(() => {
+    listTests()
+      .then((all) => {
+        setAllCategories(Array.from(new Set(all.map((t) => t.category).filter((c): c is string => Boolean(c)))));
+      })
+      .catch(() => {
+        // Best-effort — category chips just won't render if this fails.
+      });
+  }, []);
 
   return (
     <div className="section container-page">
@@ -70,12 +93,22 @@ export default function TestsPage() {
       </div>
 
       <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-        <TestSearchAutocomplete value={search} onChange={setSearch} className="flex-1" />
+        <TestSearchAutocomplete
+          value={search}
+          onChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          className="flex-1"
+        />
 
         <div className="relative sm:w-52">
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as typeof sort)}
+            onChange={(e) => {
+              setSort(e.target.value as typeof sort);
+              setPage(1);
+            }}
             className="form-input w-full appearance-none pr-9"
           >
             <option value="">Sort by</option>
@@ -86,22 +119,28 @@ export default function TestsPage() {
         </div>
       </div>
 
-      {categories.length > 0 && (
+      {allCategories.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => setCategory("")}
+            onClick={() => {
+              setCategory("");
+              setPage(1);
+            }}
             className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors duration-[250ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
               category === "" ? "bg-primary-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-primary-50 hover:text-primary-700"
             }`}
           >
             All Categories
           </button>
-          {categories.map((c) => (
+          {allCategories.map((c) => (
             <button
               key={c}
               type="button"
-              onClick={() => setCategory(c)}
+              onClick={() => {
+                setCategory(c);
+                setPage(1);
+              }}
               className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors duration-[250ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
                 category === c ? "bg-primary-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-primary-50 hover:text-primary-700"
               }`}
@@ -127,14 +166,22 @@ export default function TestsPage() {
         {!loading && !error && tests.length > 0 && (
           <>
             <p className="mb-4 text-sm text-slate-500">
-              Showing <span className="font-semibold text-slate-700">{tests.length}</span>{" "}
-              {tests.length === 1 ? "test" : "tests"}
+              Showing <span className="font-semibold text-slate-700">{tests.length}</span> of{" "}
+              <span className="font-semibold text-slate-700">{totalRows}</span>{" "}
+              {totalRows === 1 ? "test" : "tests"}
             </p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {tests.map((test) => (
                 <TestCard key={test.id} test={test} />
               ))}
             </div>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalRows={totalRows}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
           </>
         )}
       </div>

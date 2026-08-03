@@ -27,10 +27,31 @@ function byDisplayOrder(a: Test, b: Test): number {
   return (a.display_order ?? a.id) - (b.display_order ?? b.id);
 }
 
+/**
+ * Walks every page rather than trusting a single large `page_size` request, since the backend
+ * may cap it below what's asked for.
+ */
 export async function listTests(query: TestQuery = {}): Promise<Test[]> {
-  const { data } = await api.get<PaginatedResponse<Test>>("/tests", { params: { ...query, page_size: 10 } });
-  const tests = data.items.map(normalizeTest);
+  const all: Test[] = [];
+  let page = 1;
+  for (;;) {
+    const { data } = await api.get<PaginatedResponse<Test>>("/tests", {
+      params: { ...query, page, page_size: 10 },
+    });
+    all.push(...data.items);
+    if (data.items.length === 0 || page >= data.total_pages) break;
+    page += 1;
+  }
+  const tests = all.map(normalizeTest);
   return query.sort ? tests : tests.sort(byDisplayOrder);
+}
+
+/** Single-page fetch for UI with page-number controls — one API call per page. */
+export async function listTestsPaginated(
+  query: TestQuery & { page: number; page_size: number }
+): Promise<PaginatedResponse<Test>> {
+  const { data } = await api.get<PaginatedResponse<Test>>("/tests", { params: query });
+  return { ...data, items: data.items.map(normalizeTest) };
 }
 
 export async function getTest(id: number): Promise<Test> {
@@ -54,6 +75,15 @@ export async function adminListTests(): Promise<Test[]> {
     page += 1;
   }
   return all.map(normalizeTest).sort(byDisplayOrder);
+}
+
+/** Single-page fetch for UI with page-number controls — one API call per page. */
+export async function adminListTestsPaginated(params: {
+  page: number;
+  page_size: number;
+}): Promise<PaginatedResponse<Test>> {
+  const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params });
+  return { ...data, items: data.items.map(normalizeTest) };
 }
 
 export async function adminGetTest(id: number): Promise<Test> {
@@ -90,7 +120,11 @@ export async function adminReorderTestParameters(testId: number, orderedIds: num
   return normalizeTest(data);
 }
 
-/** Persists a new home-page display order for tests by writing a fresh `display_order` to each. */
-export async function adminReorderTests(orderedIds: number[]): Promise<void> {
-  await Promise.all(orderedIds.map((id, index) => adminUpdateTest(id, { display_order: index })));
+/**
+ * Persists a new home-page display order for tests by writing a fresh `display_order` to each.
+ * `startIndex` offsets the written values so a reorder scoped to a single loaded page doesn't
+ * collide with the display_order of tests on other pages.
+ */
+export async function adminReorderTests(orderedIds: number[], startIndex = 0): Promise<void> {
+  await Promise.all(orderedIds.map((id, index) => adminUpdateTest(id, { display_order: startIndex + index })));
 }

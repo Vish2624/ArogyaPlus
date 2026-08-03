@@ -32,10 +32,31 @@ function byDisplayOrder(a: Package, b: Package): number {
   return (a.display_order ?? a.id) - (b.display_order ?? b.id);
 }
 
+/**
+ * Walks every page rather than trusting a single large `page_size` request, since the backend
+ * may cap it below what's asked for.
+ */
 export async function listPackages(query: PackageQuery = {}): Promise<Package[]> {
-  const { data } = await api.get<PaginatedResponse<Package>>("/packages", { params: { ...query, page_size: 10 } });
-  const packages = data.items.map(normalizePackage);
+  const all: Package[] = [];
+  let page = 1;
+  for (;;) {
+    const { data } = await api.get<PaginatedResponse<Package>>("/packages", {
+      params: { ...query, page, page_size: 10 },
+    });
+    all.push(...data.items);
+    if (data.items.length === 0 || page >= data.total_pages) break;
+    page += 1;
+  }
+  const packages = all.map(normalizePackage);
   return query.sort ? packages : packages.sort(byDisplayOrder);
+}
+
+/** Single-page fetch for UI with page-number controls — one API call per page. */
+export async function listPackagesPaginated(
+  query: PackageQuery & { page: number; page_size: number }
+): Promise<PaginatedResponse<Package>> {
+  const { data } = await api.get<PaginatedResponse<Package>>("/packages", { params: query });
+  return { ...data, items: data.items.map(normalizePackage) };
 }
 
 export async function getPackage(id: number): Promise<Package> {
@@ -59,6 +80,15 @@ export async function adminListPackages(): Promise<Package[]> {
     page += 1;
   }
   return all.map(normalizePackage).sort(byDisplayOrder);
+}
+
+/** Single-page fetch for UI with page-number controls — one API call per page. */
+export async function adminListPackagesPaginated(params: {
+  page: number;
+  page_size: number;
+}): Promise<PaginatedResponse<Package>> {
+  const { data } = await api.get<PaginatedResponse<Package>>("/admin/packages", { params });
+  return { ...data, items: data.items.map(normalizePackage) };
 }
 
 export async function adminGetPackage(id: number): Promise<Package> {
@@ -90,7 +120,11 @@ export async function adminReorderPackageTests(packageId: number, orderedIds: nu
   return normalizePackage(data);
 }
 
-/** Persists a new home-page display order for packages by writing a fresh `display_order` to each. */
-export async function adminReorderPackages(orderedIds: number[]): Promise<void> {
-  await Promise.all(orderedIds.map((id, index) => adminUpdatePackage(id, { display_order: index })));
+/**
+ * Persists a new home-page display order for packages by writing a fresh `display_order` to
+ * each. `startIndex` offsets the written values so a reorder scoped to a single loaded page
+ * doesn't collide with the display_order of packages on other pages.
+ */
+export async function adminReorderPackages(orderedIds: number[], startIndex = 0): Promise<void> {
+  await Promise.all(orderedIds.map((id, index) => adminUpdatePackage(id, { display_order: startIndex + index })));
 }

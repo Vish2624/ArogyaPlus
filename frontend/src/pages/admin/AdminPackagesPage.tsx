@@ -11,7 +11,7 @@ import { getApiErrorMessage } from "@/services/api";
 import {
   adminCreatePackage,
   adminDeletePackage,
-  adminListPackages,
+  adminListPackagesPaginated,
   adminReorderPackages,
   adminUpdatePackage,
 } from "@/services/packageService";
@@ -25,6 +25,8 @@ const PAGE_SIZE = 10;
 
 export default function AdminPackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
   const [allTests, setAllTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,21 +36,19 @@ export default function AdminPackagesPage() {
   const [reordering, setReordering] = useState(false);
   const [page, setPage] = useState(1);
 
-  const totalPages = Math.max(1, Math.ceil(packages.length / PAGE_SIZE));
-  const pagePackages = packages.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [packages.length]);
+  }, [totalPages]);
 
-  const loadData = async () => {
+  const loadPackages = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [packagesData, testsData] = await Promise.all([adminListPackages(), adminListTests()]);
-      setPackages(packagesData);
-      setAllTests(testsData);
+      const data = await adminListPackagesPaginated({ page, page_size: PAGE_SIZE });
+      setPackages(data.items);
+      setTotalPages(data.total_pages);
+      setTotalRows(data.total_rows);
     } catch (err) {
       setError(getApiErrorMessage(err, "We couldn't load packages. Please try again."));
     } finally {
@@ -57,7 +57,14 @@ export default function AdminPackagesPage() {
   };
 
   useEffect(() => {
-    loadData();
+    loadPackages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  // One-time full-catalogue fetch feeding the "included tests" picker in the add/edit modal —
+  // unrelated to the paginated table above, so it doesn't refetch when the page changes.
+  useEffect(() => {
+    adminListTests().then(setAllTests);
   }, []);
 
   const openAddModal = () => {
@@ -76,7 +83,10 @@ export default function AdminPackagesPage() {
       setPackages((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     } else {
       const created = await adminCreatePackage(values);
-      setPackages((prev) => [...prev, created]);
+      setTotalRows((n) => n + 1);
+      if (packages.length < PAGE_SIZE) {
+        setPackages((prev) => [...prev, created]);
+      }
     }
     setModalOpen(false);
   };
@@ -85,7 +95,13 @@ export default function AdminPackagesPage() {
     if (!window.confirm(`Delete package "${pkg.name}"? This cannot be undone.`)) return;
     try {
       await adminDeletePackage(pkg.id);
-      setPackages((prev) => prev.filter((p) => p.id !== pkg.id));
+      setTotalRows((n) => n - 1);
+      const remaining = packages.filter((p) => p.id !== pkg.id);
+      if (remaining.length === 0 && page > 1) {
+        setPage((p) => p - 1);
+      } else {
+        setPackages(remaining);
+      }
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Could not delete this package."));
     }
@@ -117,10 +133,10 @@ export default function AdminPackagesPage() {
 
     setReordering(true);
     try {
-      await adminReorderPackages(next.map((p) => p.id));
+      await adminReorderPackages(next.map((p) => p.id), (page - 1) * PAGE_SIZE);
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Could not save the new order."));
-      loadData();
+      loadPackages();
     } finally {
       setReordering(false);
     }
@@ -144,15 +160,16 @@ export default function AdminPackagesPage() {
 
       <div className="mt-6">
         {loading && <Spinner label="Loading packages..." />}
-        {!loading && error && <ErrorState message={error} onRetry={loadData} />}
+        {!loading && error && <ErrorState message={error} onRetry={loadPackages} />}
         {!loading && !error && packages.length === 0 && (
           <EmptyState title="No packages yet" description="Add your first health package to get started." />
         )}
         {!loading && !error && packages.length > 0 && (
           <>
             <p className="mb-3 text-sm text-slate-500">
-              Showing <span className="font-semibold text-slate-700">{packages.length}</span>{" "}
-              {packages.length === 1 ? "package" : "packages"}
+              Showing <span className="font-semibold text-slate-700">{packages.length}</span> of{" "}
+              <span className="font-semibold text-slate-700">{totalRows}</span>{" "}
+              {totalRows === 1 ? "package" : "packages"}
             </p>
           <div className="card overflow-x-auto p-2">
             <table className="w-full text-left text-sm">
@@ -169,7 +186,7 @@ export default function AdminPackagesPage() {
                 </tr>
               </thead>
               <tbody>
-                {pagePackages.map((pkg) => (
+                {packages.map((pkg) => (
                   <tr
                     key={pkg.id}
                     draggable
@@ -226,7 +243,7 @@ export default function AdminPackagesPage() {
           <Pagination
             currentPage={page}
             totalPages={totalPages}
-            totalRows={packages.length}
+            totalRows={totalRows}
             pageSize={PAGE_SIZE}
             onPageChange={setPage}
           />

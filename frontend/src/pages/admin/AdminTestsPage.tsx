@@ -13,7 +13,7 @@ import {
   adminAddTestParameter,
   adminCreateTest,
   adminDeleteTest,
-  adminListTests,
+  adminListTestsPaginated,
   adminRemoveTestParameter,
   adminReorderTests,
   adminUpdateTest,
@@ -27,6 +27,8 @@ const PAGE_SIZE = 10;
 
 export default function AdminTestsPage() {
   const [tests, setTests] = useState<Test[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
   const [parameterCatalog, setParameterCatalog] = useState<Parameter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,19 +38,19 @@ export default function AdminTestsPage() {
   const [reordering, setReordering] = useState(false);
   const [page, setPage] = useState(1);
 
-  const totalPages = Math.max(1, Math.ceil(tests.length / PAGE_SIZE));
-  const pageTests = tests.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tests.length]);
+  }, [totalPages]);
 
   const loadTests = async () => {
     setLoading(true);
     setError(null);
     try {
-      setTests(await adminListTests());
+      const data = await adminListTestsPaginated({ page, page_size: PAGE_SIZE });
+      setTests(data.items);
+      setTotalPages(data.total_pages);
+      setTotalRows(data.total_rows);
     } catch (err) {
       setError(getApiErrorMessage(err, "We couldn't load tests. Please try again."));
     } finally {
@@ -58,6 +60,12 @@ export default function AdminTestsPage() {
 
   useEffect(() => {
     loadTests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  // One-time full-catalogue fetch feeding the parameter picker in the add/edit modal —
+  // unrelated to the paginated table above, so it doesn't refetch when the page changes.
+  useEffect(() => {
     adminListParameters().then(setParameterCatalog);
   }, []);
 
@@ -96,7 +104,14 @@ export default function AdminTestsPage() {
       }
     }
 
-    setTests((prev) => (editingTest ? prev.map((t) => (t.id === test.id ? test : t)) : [...prev, test]));
+    if (editingTest) {
+      setTests((prev) => prev.map((t) => (t.id === test.id ? test : t)));
+    } else {
+      setTotalRows((n) => n + 1);
+      if (tests.length < PAGE_SIZE) {
+        setTests((prev) => [...prev, test]);
+      }
+    }
     setModalOpen(false);
   };
 
@@ -104,7 +119,13 @@ export default function AdminTestsPage() {
     if (!window.confirm(`Delete test "${test.name}"? This cannot be undone.`)) return;
     try {
       await adminDeleteTest(test.id);
-      setTests((prev) => prev.filter((t) => t.id !== test.id));
+      setTotalRows((n) => n - 1);
+      const remaining = tests.filter((t) => t.id !== test.id);
+      if (remaining.length === 0 && page > 1) {
+        setPage((p) => p - 1);
+      } else {
+        setTests(remaining);
+      }
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Could not delete this test."));
     }
@@ -136,7 +157,7 @@ export default function AdminTestsPage() {
 
     setReordering(true);
     try {
-      await adminReorderTests(next.map((t) => t.id));
+      await adminReorderTests(next.map((t) => t.id), (page - 1) * PAGE_SIZE);
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Could not save the new order."));
       loadTests();
@@ -170,8 +191,9 @@ export default function AdminTestsPage() {
         {!loading && !error && tests.length > 0 && (
           <>
             <p className="mb-3 text-sm text-slate-500">
-              Showing <span className="font-semibold text-slate-700">{tests.length}</span>{" "}
-              {tests.length === 1 ? "test" : "tests"}
+              Showing <span className="font-semibold text-slate-700">{tests.length}</span> of{" "}
+              <span className="font-semibold text-slate-700">{totalRows}</span>{" "}
+              {totalRows === 1 ? "test" : "tests"}
             </p>
           <div className="card overflow-x-auto p-2">
             <table className="w-full text-left text-sm">
@@ -189,7 +211,7 @@ export default function AdminTestsPage() {
                 </tr>
               </thead>
               <tbody>
-                {pageTests.map((test) => (
+                {tests.map((test) => (
                   <tr
                     key={test.id}
                     draggable
@@ -244,7 +266,7 @@ export default function AdminTestsPage() {
           <Pagination
             currentPage={page}
             totalPages={totalPages}
-            totalRows={tests.length}
+            totalRows={totalRows}
             pageSize={PAGE_SIZE}
             onPageChange={setPage}
           />
