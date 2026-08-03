@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import EmptyState from "@/components/common/EmptyState";
@@ -11,7 +11,7 @@ import PackageCardSkeleton from "@/components/packages/PackageCardSkeleton";
 import PackageDetailModal from "@/components/packages/PackageDetailModal";
 import PackageSearchAutocomplete from "@/components/packages/PackageSearchAutocomplete";
 import { getApiErrorMessage } from "@/services/api";
-import { listPackages, listPackagesPaginated } from "@/services/packageService";
+import { listPackagesPaginated } from "@/services/packageService";
 import type { Package } from "@/types/package";
 
 const PAGE_SIZE = 9;
@@ -29,8 +29,6 @@ export default function PackagesPage() {
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState<"price_asc" | "price_desc" | "">("");
   const [page, setPage] = useState(1);
-
-  const [allCategories, setAllCategories] = useState<string[]>([]);
 
   const loadPackages = async () => {
     setLoading(true);
@@ -69,17 +67,13 @@ export default function PackagesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category, sort, page]);
 
-  // One-time full-catalogue fetch just to derive the category chip list, decoupled from the
-  // paginated grid fetch above so switching pages never re-triggers it.
-  useEffect(() => {
-    listPackages()
-      .then((all) => {
-        setAllCategories(Array.from(new Set(all.map((p) => p.category).filter((c): c is string => Boolean(c)))));
-      })
-      .catch(() => {
-        // Best-effort — category chips just won't render if this fails.
-      });
-  }, []);
+  // Derived from whatever page is currently loaded — chips reflect categories present on this
+  // page only, not the whole catalogue (no endpoint exists to list categories without loading
+  // every package).
+  const categories = useMemo(
+    () => Array.from(new Set(packages.map((p) => p.category).filter((c): c is string => Boolean(c)))),
+    [packages]
+  );
 
   return (
     <div className="section container-page">
@@ -121,7 +115,7 @@ export default function PackagesPage() {
         </div>
       </div>
 
-      {allCategories.length > 0 && (
+      {categories.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
@@ -135,7 +129,7 @@ export default function PackagesPage() {
           >
             All Categories
           </button>
-          {allCategories.map((c) => (
+          {categories.map((c) => (
             <button
               key={c}
               type="button"

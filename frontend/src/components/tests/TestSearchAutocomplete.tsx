@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
-import SearchAutocomplete from "@/components/common/SearchAutocomplete";
-import { listTests } from "@/services/testService";
-import type { Test } from "@/types/test";
+import SearchAutocomplete, { type AutocompleteSuggestion } from "@/components/common/SearchAutocomplete";
+import { listTestsPaginated } from "@/services/testService";
 
 interface TestSearchAutocompleteProps {
   value: string;
@@ -17,21 +16,30 @@ export default function TestSearchAutocomplete({
   placeholder = "Search tests...",
   className,
 }: TestSearchAutocompleteProps) {
-  const [allTests, setAllTests] = useState<Test[]>([]);
+  const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
 
   useEffect(() => {
-    listTests()
-      .then(setAllTests)
-      .catch(() => setAllTests([]));
-  }, []);
-
-  const items = allTests.map((t) => ({ id: t.id, label: t.name, subtitle: t.category ?? undefined }));
+    const query = value.trim();
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      listTestsPaginated({ search: query, page: 1, page_size: 8 })
+        .then((data) => {
+          setSuggestions(data.items.map((t) => ({ id: t.id, label: t.name, subtitle: t.category ?? undefined })));
+        })
+        .catch(() => setSuggestions([]));
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [value]);
 
   return (
     <SearchAutocomplete
       value={value}
       onChange={onChange}
-      items={items}
+      items={suggestions}
+      filterLocally={false}
       placeholder={placeholder}
       className={className}
       emptyLabel="No matching tests. Try a different spelling."

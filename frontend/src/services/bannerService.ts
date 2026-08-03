@@ -17,7 +17,7 @@ export async function adminListBanners(): Promise<Banner[]> {
   const all: Banner[] = [];
   let page = 1;
   for (;;) {
-    const { data } = await api.get<PaginatedResponse<Banner>>("/admin/banners", { params: { page, page_size: 10 } });
+    const { data } = await api.get<PaginatedResponse<Banner>>("/admin/banners", { params: { page, page_size: 100 } });
     all.push(...data.items);
     if (data.items.length === 0 || page >= data.total_pages) break;
     page += 1;

@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import EmptyState from "@/components/common/EmptyState";
@@ -10,7 +10,7 @@ import TestCard from "@/components/tests/TestCard";
 import TestCardSkeleton from "@/components/tests/TestCardSkeleton";
 import TestSearchAutocomplete from "@/components/tests/TestSearchAutocomplete";
 import { getApiErrorMessage } from "@/services/api";
-import { listTests, listTestsPaginated } from "@/services/testService";
+import { listTestsPaginated } from "@/services/testService";
 import type { Test } from "@/types/test";
 
 const PAGE_SIZE = 9;
@@ -27,8 +27,6 @@ export default function TestsPage() {
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState<"price_asc" | "price_desc" | "">("");
   const [page, setPage] = useState(1);
-
-  const [allCategories, setAllCategories] = useState<string[]>([]);
 
   const loadTests = async () => {
     setLoading(true);
@@ -67,17 +65,13 @@ export default function TestsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category, sort, page]);
 
-  // One-time full-catalogue fetch just to derive the category chip list, decoupled from the
-  // paginated grid fetch above so switching pages never re-triggers it.
-  useEffect(() => {
-    listTests()
-      .then((all) => {
-        setAllCategories(Array.from(new Set(all.map((t) => t.category).filter((c): c is string => Boolean(c)))));
-      })
-      .catch(() => {
-        // Best-effort — category chips just won't render if this fails.
-      });
-  }, []);
+  // Derived from whatever page is currently loaded — chips reflect categories present on this
+  // page only, not the whole catalogue (no endpoint exists to list categories without loading
+  // every test).
+  const categories = useMemo(
+    () => Array.from(new Set(tests.map((t) => t.category).filter((c): c is string => Boolean(c)))),
+    [tests]
+  );
 
   return (
     <div className="section container-page">
@@ -119,7 +113,7 @@ export default function TestsPage() {
         </div>
       </div>
 
-      {allCategories.length > 0 && (
+      {categories.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
@@ -133,7 +127,7 @@ export default function TestsPage() {
           >
             All Categories
           </button>
-          {allCategories.map((c) => (
+          {categories.map((c) => (
             <button
               key={c}
               type="button"

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
-import SearchAutocomplete from "@/components/common/SearchAutocomplete";
-import { listPackages } from "@/services/packageService";
-import type { Package } from "@/types/package";
+import SearchAutocomplete, { type AutocompleteSuggestion } from "@/components/common/SearchAutocomplete";
+import { listPackagesPaginated } from "@/services/packageService";
 
 interface PackageSearchAutocompleteProps {
   value: string;
@@ -17,21 +16,30 @@ export default function PackageSearchAutocomplete({
   placeholder = "Search packages...",
   className,
 }: PackageSearchAutocompleteProps) {
-  const [allPackages, setAllPackages] = useState<Package[]>([]);
+  const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
 
   useEffect(() => {
-    listPackages()
-      .then(setAllPackages)
-      .catch(() => setAllPackages([]));
-  }, []);
-
-  const items = allPackages.map((p) => ({ id: p.id, label: p.name, subtitle: p.category ?? undefined }));
+    const query = value.trim();
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      listPackagesPaginated({ search: query, page: 1, page_size: 8 })
+        .then((data) => {
+          setSuggestions(data.items.map((p) => ({ id: p.id, label: p.name, subtitle: p.category ?? undefined })));
+        })
+        .catch(() => setSuggestions([]));
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [value]);
 
   return (
     <SearchAutocomplete
       value={value}
       onChange={onChange}
-      items={items}
+      items={suggestions}
+      filterLocally={false}
       placeholder={placeholder}
       className={className}
       emptyLabel="No matching packages. Try a different spelling."

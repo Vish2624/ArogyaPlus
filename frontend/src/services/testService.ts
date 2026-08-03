@@ -36,7 +36,7 @@ export async function listTests(query: TestQuery = {}): Promise<Test[]> {
   let page = 1;
   for (;;) {
     const { data } = await api.get<PaginatedResponse<Test>>("/tests", {
-      params: { ...query, page, page_size: 10 },
+      params: { ...query, page, page_size: 100 },
     });
     all.push(...data.items);
     if (data.items.length === 0 || page >= data.total_pages) break;
@@ -69,7 +69,7 @@ export async function adminListTests(): Promise<Test[]> {
   const all: Test[] = [];
   let page = 1;
   for (;;) {
-    const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params: { page, page_size: 10 } });
+    const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params: { page, page_size: 100 } });
     all.push(...data.items);
     if (data.items.length === 0 || page >= data.total_pages) break;
     page += 1;

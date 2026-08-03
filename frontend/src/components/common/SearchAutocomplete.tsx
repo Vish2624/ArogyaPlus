@@ -21,6 +21,12 @@ interface SearchAutocompleteProps<T extends AutocompleteSuggestion> {
   inputClassName?: string;
   iconClassName?: string;
   emptyLabel?: string;
+  /**
+   * When true (default), `items` is the full candidate pool and gets fuzzy-filtered against
+   * `value` locally. Set false when `items` is already the exact suggestion set to display
+   * as-is (e.g. results of a server-side search) — the caller owns filtering in that case.
+   */
+  filterLocally?: boolean;
   /** Change this value (e.g. a slide index) to force the dropdown closed, such as when content around the input reflows. */
   closeSignal?: number | string;
   /** Fires true when the input gains focus and false when it loses focus (clicking a suggestion doesn't blur it). */
@@ -37,6 +43,7 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
   inputClassName = "form-input pl-10",
   iconClassName = "left-3.5 h-4 w-4 text-slate-500",
   emptyLabel = "No matches. Try a different spelling.",
+  filterLocally = true,
   closeSignal,
   onActiveChange,
 }: SearchAutocompleteProps<T>) {
@@ -46,7 +53,10 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const suggestions = useMemo(() => fuzzySearch(value, items, (i) => i.label, 8), [value, items]);
+  const suggestions = useMemo(
+    () => (filterLocally ? fuzzySearch(value, items, (i) => i.label, 8) : items),
+    [filterLocally, value, items]
+  );
   const showDropdown = open && value.trim().length > 0;
 
   useEffect(() => {
@@ -135,7 +145,7 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
                   </li>
                 ))}
               </ul>
-            ) : items.length > 0 ? (
+            ) : (filterLocally ? items.length > 0 : value.trim().length > 0) ? (
               <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-500 shadow-elevated">
                 {emptyLabel}
               </div>
