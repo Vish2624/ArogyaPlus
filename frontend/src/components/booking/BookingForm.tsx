@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
-import { Clock, MapPin, Wallet } from "lucide-react";
+import { AlertTriangle, Clock, MapPin, Wallet } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -22,6 +22,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
   const items = useCartStore((s) => s.items);
   const visitMode = useCartStore((s) => s.visitMode);
   const setVisitMode = useCartStore((s) => s.setVisitMode);
+  const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);
   const addHomeCollection = useCartStore((s) => s.addHomeCollection);
   const removeHomeCollection = useCartStore((s) => s.removeHomeCollection);
   const clearCart = useCartStore((s) => s.clearCart);
@@ -33,6 +34,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -48,7 +50,14 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
     },
   });
 
+  const visitModeValue = watch("visit_mode");
+  const homeCollectionMismatch = visitModeValue === "home" && !homeCollectionAdded;
+
   const onSubmit = async (values: BookingFormValues) => {
+    if (homeCollectionMismatch) {
+      setSubmitError("Add the home collection fee or switch to Lab Visit before confirming.");
+      return;
+    }
     setSubmitError(null);
     try {
       const { country_code, phone, ...rest } = values;
@@ -89,6 +98,34 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
             />
           )}
         />
+        {homeCollectionMismatch && (
+          <div className="mt-3 flex flex-col gap-2 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+            <span className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              You removed the home collection fee, but Home Visit is still selected. Add it back or switch to Lab Visit to continue.
+            </span>
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onClick={addHomeCollection}
+                className="rounded-md bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-200"
+              >
+                Add Home Collection
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setValue("visit_mode", "lab", { shouldValidate: true });
+                  setVisitMode("lab");
+                  removeHomeCollection();
+                }}
+                className="rounded-md bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-200"
+              >
+                Switch to Lab Visit
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="border-t border-slate-100 pt-6">
@@ -212,7 +249,11 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
         <p className={clsx("rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700")}>{submitError}</p>
       )}
 
-      <button type="submit" disabled={isSubmitting || items.length === 0} className="btn-primary w-full">
+      <button
+        type="submit"
+        disabled={isSubmitting || items.length === 0 || homeCollectionMismatch}
+        className="btn-primary w-full"
+      >
         {isSubmitting ? "Submitting..." : "Confirm Booking"}
       </button>
     </form>
