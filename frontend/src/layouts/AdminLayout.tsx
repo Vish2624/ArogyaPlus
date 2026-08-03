@@ -32,7 +32,7 @@ export default function AdminLayout() {
         Skip to main content
       </a>
       <AdminSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
-      <div className="flex-1 overflow-x-hidden">
+      <div className="flex-1 overflow-x-hidden lg:pl-64">
         <div className="flex h-14 items-center gap-3 border-b border-slate-100 bg-white px-4 lg:hidden">
           <button
             type="button"
