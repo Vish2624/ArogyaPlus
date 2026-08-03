@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronDown, ChevronUp, Clock, Utensils } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Clock, FlaskConical, Utensils } from "lucide-react";
 import { useState } from "react";
 
 import Modal from "@/components/common/Modal";
@@ -19,6 +19,8 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
   const [expandedTestId, setExpandedTestId] = useState<number | null>(null);
 
   if (!pkg) return null;
+
+  const totalParameters = new Set(pkg.tests.flatMap((test) => test.parameters.map((p) => p.id))).size;
 
   return (
     <Modal
@@ -89,7 +91,13 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
       </div>
 
       <div className="mt-5">
-        <h4 className="text-sm font-semibold text-slate-900">Included Tests ({pkg.tests.length})</h4>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h4 className="text-sm font-semibold text-slate-900">Included Tests ({pkg.tests.length})</h4>
+          <span className="badge gap-1.5 border border-accent-200 bg-accent-50 px-3 py-1.5 text-xs font-bold text-accent-700">
+            <FlaskConical className="h-3.5 w-3.5" aria-hidden="true" />
+            Total Parameters ({totalParameters})
+          </span>
+        </div>
         <ul className="custom-scrollbar mt-2 max-h-72 space-y-2 overflow-y-auto pr-1">
           {pkg.tests.map((test) => {
             const isExpanded = expandedTestId === test.id;
@@ -131,13 +139,8 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
                     {test.parameters.length > 0 ? (
                       <ul className="space-y-1">
                         {test.parameters.map((parameter) => (
-                          <li key={parameter.id} className="flex items-center justify-between gap-2 py-0.5 text-xs">
+                          <li key={parameter.id} className="py-0.5 text-xs">
                             <span className="font-semibold text-slate-800">{parameter.name}</span>
-                            {(parameter.unit || parameter.reference_range) && (
-                              <span className="shrink-0 text-slate-400">
-                                {[parameter.unit, parameter.reference_range].filter(Boolean).join(" · ")}
-                              </span>
-                            )}
                           </li>
                         ))}
                       </ul>

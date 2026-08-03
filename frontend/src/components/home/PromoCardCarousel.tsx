@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import promoPartnerImage from "@/assets/promo-partner-card.svg";
 import promoCorporateImage from "@/assets/promo-corporate-card.svg";
 import promoHomeVisitImage from "@/assets/promo-homevisit-card.svg";
+import { CONTACT } from "@/utils/constants";
 
 interface PromoCard {
   id: number;
@@ -31,7 +32,7 @@ const CARDS: PromoCard[] = [
     statIcon: Users,
     statText: "500+ Partner Facilities Nationwide",
     buttonLabel: "Become a Partner",
-    buttonLink: "/packages",
+    buttonLink: `mailto:${CONTACT.email}`,
     imageUrl: promoPartnerImage,
   },
   {
@@ -99,9 +100,15 @@ export default function PromoCardCarousel() {
                 <StatIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 {card.statText}
               </span>
-              <Link to={card.buttonLink} className="btn-primary mt-6 w-fit">
-                {card.buttonLabel}
-              </Link>
+              {card.buttonLink.startsWith("mailto:") ? (
+                <a href={card.buttonLink} className="btn-primary mt-6 w-fit">
+                  {card.buttonLabel}
+                </a>
+              ) : (
+                <Link to={card.buttonLink} className="btn-primary mt-6 w-fit">
+                  {card.buttonLabel}
+                </Link>
+              )}
             </div>
             <div className="min-h-[240px] sm:min-h-[320px]">
               <img src={card.imageUrl} alt={card.title} className="h-full w-full object-cover" />

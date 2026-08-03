@@ -106,14 +106,9 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
             {test.parameters.map((parameter) => (
               <li
                 key={parameter.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3.5 py-2.5 text-sm"
+                className="rounded-lg border border-slate-100 px-3.5 py-2.5 text-sm"
               >
                 <span className="font-medium text-slate-900">{parameter.name}</span>
-                {(parameter.unit || parameter.reference_range) && (
-                  <span className="shrink-0 text-xs text-slate-500">
-                    {[parameter.unit, parameter.reference_range].filter(Boolean).join(" · ")}
-                  </span>
-                )}
               </li>
             ))}
           </ul>
