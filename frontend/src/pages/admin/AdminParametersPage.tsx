@@ -16,7 +16,7 @@ import {
 import type { Parameter } from "@/types/parameter";
 import type { ParameterFormValues } from "@/utils/validation";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export default function AdminParametersPage() {
   const [parameters, setParameters] = useState<Parameter[]>([]);

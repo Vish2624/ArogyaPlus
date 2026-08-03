@@ -18,7 +18,7 @@ import { downloadBookingPdf } from "@/utils/bookingPdf";
 import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
 
 const STATUS_OPTIONS: BookingStatus[] = ["New", "Contacted", "Done"];
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);

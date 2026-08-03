@@ -21,7 +21,7 @@ import type { Test } from "@/types/test";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackageFormValues } from "@/utils/validation";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export default function AdminPackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);

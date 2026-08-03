@@ -12,7 +12,7 @@ export async function adminListParameters(search?: string): Promise<Parameter[]>
   let page = 1;
   for (;;) {
     const { data } = await api.get<PaginatedResponse<Parameter>>("/admin/parameters", {
-      params: { page, page_size: 500, ...(search ? { search } : {}) },
+      params: { page, page_size: 10, ...(search ? { search } : {}) },
     });
     all.push(...data.items);
     if (data.items.length === 0 || page >= data.total_pages) break;

@@ -53,7 +53,7 @@ export async function adminListPackages(): Promise<Package[]> {
   const all: Package[] = [];
   let page = 1;
   for (;;) {
-    const { data } = await api.get<PaginatedResponse<Package>>("/admin/packages", { params: { page, page_size: 500 } });
+    const { data } = await api.get<PaginatedResponse<Package>>("/admin/packages", { params: { page, page_size: 10 } });
     all.push(...data.items);
     if (data.items.length === 0 || page >= data.total_pages) break;
     page += 1;
