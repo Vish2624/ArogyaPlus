@@ -102,7 +102,7 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
       <div className="mt-5">
         <h4 className="text-sm font-semibold text-slate-900">Parameters Included ({test.parameters.length})</h4>
         {test.parameters.length > 0 ? (
-          <ul className="custom-scrollbar mt-2 max-h-56 space-y-1.5 overflow-y-auto pr-1">
+          <ul className="custom-scrollbar scroll-fade-b mt-2 max-h-56 space-y-1.5 overflow-y-auto pr-1">
             {test.parameters.map((parameter) => (
               <li
                 key={parameter.id}

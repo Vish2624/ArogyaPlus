@@ -98,7 +98,7 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
             Total Parameters ({totalParameters})
           </span>
         </div>
-        <ul className="custom-scrollbar mt-2 max-h-72 space-y-2 overflow-y-auto pr-1">
+        <ul className="custom-scrollbar scroll-fade-b mt-2 max-h-72 space-y-2 overflow-y-auto pr-1">
           {pkg.tests.map((test) => {
             const isExpanded = expandedTestId === test.id;
             return (

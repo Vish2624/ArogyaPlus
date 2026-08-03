@@ -111,6 +111,13 @@
     border-radius: 9999px;
   }
 
+  /* Soft fade at the bottom edge of a scrollable list, so a truncated last item reads as
+     "more below" instead of an abrupt cut. */
+  .scroll-fade-b {
+    mask-image: linear-gradient(to bottom, black calc(100% - 20px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 20px), transparent 100%);
+  }
+
   .badge-bump {
     animation: badge-bump 400ms ease-out;
   }

@@ -171,7 +171,7 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
 
                     <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500 sm:mt-3 sm:text-xs">
                       <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary-600" aria-hidden="true" />
-                      {featuredPackage.tests.length} tests included
+                      {featuredPackage.tests.length} {featuredPackage.tests.length === 1 ? "test" : "tests"} included
                     </div>
 
                     <div className="mt-2.5 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3">

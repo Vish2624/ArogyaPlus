@@ -84,7 +84,7 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
         </p>
       )}
 
-      <ul className="custom-scrollbar mt-2.5 max-h-24 flex-1 space-y-1 overflow-y-auto border-t border-slate-100 pr-2 pt-2.5 text-xs text-slate-600 sm:mt-3 sm:max-h-28 sm:space-y-1.5 sm:pt-3">
+      <ul className="custom-scrollbar scroll-fade-b mt-2.5 max-h-24 flex-1 space-y-1 overflow-y-auto border-t border-slate-100 pr-2 pt-2.5 text-xs text-slate-600 sm:mt-3 sm:max-h-28 sm:space-y-1.5 sm:pt-3">
         {pkg.tests.map((test) => (
           <li key={test.id} className="flex items-start gap-2">
             <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-primary-500" aria-hidden="true" />

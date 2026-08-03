@@ -47,7 +47,7 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 sm:mt-2.5">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
           <CheckCircle2 className="h-3.5 w-3.5 text-accent-600" aria-hidden="true" />
-          {pkg.tests.length} tests included
+          {pkg.tests.length} {pkg.tests.length === 1 ? "test" : "tests"} included
         </span>
         {pkg.fasting_required === true && (
           <span className="flex items-center gap-1 text-xs font-semibold text-amber-700">
@@ -63,7 +63,7 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
         )}
       </div>
 
-      <ul className="custom-scrollbar mt-2 max-h-24 flex-1 space-y-1 overflow-y-auto border-t border-slate-100 pr-2 pt-2 text-xs text-slate-600 sm:mt-2.5 sm:max-h-28 sm:space-y-1.5 sm:pt-2.5">
+      <ul className="custom-scrollbar scroll-fade-b mt-2 max-h-24 flex-1 space-y-1 overflow-y-auto border-t border-slate-100 pr-2 pt-2 text-xs text-slate-600 sm:mt-2.5 sm:max-h-28 sm:space-y-1.5 sm:pt-2.5">
         {pkg.tests.map((test) => (
           <li key={test.id} className="flex items-start gap-2">
             <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-primary-500" aria-hidden="true" />
