@@ -70,10 +70,11 @@ export default function AdminSidebar({ mobileOpen, onClose }: AdminSidebarProps)
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center justify-between gap-2 border-b border-slate-100 px-5 text-lg font-bold text-primary-800">
-          <span className="flex items-center gap-2">
-            <Logo className="h-9 w-auto" />
-            Admin
+        <div className="flex h-16 items-center justify-between gap-2 border-b border-slate-100 px-5">
+          <span className="flex items-center gap-3">
+            <Logo className="h-10 w-auto" />
+            <span className="h-6 w-px bg-slate-200" aria-hidden="true" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Admin</span>
           </span>
           <button
             type="button"
