@@ -78,10 +78,9 @@ export async function adminListTests(): Promise<Test[]> {
 }
 
 /** Single-page fetch for UI with page-number controls — one API call per page. */
-export async function adminListTestsPaginated(params: {
-  page: number;
-  page_size: number;
-}): Promise<PaginatedResponse<Test>> {
+export async function adminListTestsPaginated(
+  params: TestQuery & { page: number; page_size: number }
+): Promise<PaginatedResponse<Test>> {
   const { data } = await api.get<PaginatedResponse<Test>>("/admin/tests", { params });
   return { ...data, items: data.items.map(normalizeTest) };
 }

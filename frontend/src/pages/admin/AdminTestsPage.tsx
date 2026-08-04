@@ -1,4 +1,4 @@
-import { GripVertical, ListTree, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, ListTree, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -36,6 +36,7 @@ export default function AdminTestsPage() {
   const [editingTest, setEditingTest] = useState<Test | null>(null);
   const [dragId, setDragId] = useState<number | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -47,7 +48,11 @@ export default function AdminTestsPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await adminListTestsPaginated({ page, page_size: PAGE_SIZE });
+      const data = await adminListTestsPaginated({
+        search: search || undefined,
+        page,
+        page_size: PAGE_SIZE,
+      });
       setTests(data.items);
       setTotalPages(data.total_pages);
       setTotalRows(data.total_rows);
@@ -59,9 +64,11 @@ export default function AdminTestsPage() {
   };
 
   useEffect(() => {
-    loadTests();
+    const delay = search ? 300 : 0;
+    const timeout = setTimeout(loadTests, delay);
+    return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [search, page]);
 
   // One-time full-catalogue fetch feeding the parameter picker in the add/edit modal —
   // unrelated to the paginated table above, so it doesn't refetch when the page changes.
@@ -182,11 +189,25 @@ export default function AdminTestsPage() {
         </button>
       </div>
 
-      <div className="mt-6">
+      <div className="relative mt-6 sm:max-w-sm">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Search tests by name or code..."
+          className="form-input pl-10"
+        />
+      </div>
+
+      <div className="mt-4">
         {loading && <Spinner label="Loading tests..." />}
         {!loading && error && <ErrorState message={error} onRetry={loadTests} />}
         {!loading && !error && tests.length === 0 && (
-          <EmptyState title="No tests yet" description="Add your first laboratory test to get started." />
+          <EmptyState
+            title={search ? "No matching tests" : "No tests yet"}
+            description={search ? "Try a different search term." : "Add your first laboratory test to get started."}
+          />
         )}
         {!loading && !error && tests.length > 0 && (
           <>

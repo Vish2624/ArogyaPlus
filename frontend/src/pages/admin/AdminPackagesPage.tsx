@@ -1,4 +1,4 @@
-import { GripVertical, ListTree, Pencil, Plus, Trash2 } from "lucide-react";
+import { GripVertical, ListTree, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -34,6 +34,7 @@ export default function AdminPackagesPage() {
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
   const [dragId, setDragId] = useState<number | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -45,7 +46,11 @@ export default function AdminPackagesPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await adminListPackagesPaginated({ page, page_size: PAGE_SIZE });
+      const data = await adminListPackagesPaginated({
+        search: search || undefined,
+        page,
+        page_size: PAGE_SIZE,
+      });
       setPackages(data.items);
       setTotalPages(data.total_pages);
       setTotalRows(data.total_rows);
@@ -57,9 +62,11 @@ export default function AdminPackagesPage() {
   };
 
   useEffect(() => {
-    loadPackages();
+    const delay = search ? 300 : 0;
+    const timeout = setTimeout(loadPackages, delay);
+    return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [search, page]);
 
   // One-time full-catalogue fetch feeding the "included tests" picker in the add/edit modal —
   // unrelated to the paginated table above, so it doesn't refetch when the page changes.
@@ -158,11 +165,25 @@ export default function AdminPackagesPage() {
         </button>
       </div>
 
-      <div className="mt-6">
+      <div className="relative mt-6 sm:max-w-sm">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Search packages by name or code..."
+          className="form-input pl-10"
+        />
+      </div>
+
+      <div className="mt-4">
         {loading && <Spinner label="Loading packages..." />}
         {!loading && error && <ErrorState message={error} onRetry={loadPackages} />}
         {!loading && !error && packages.length === 0 && (
-          <EmptyState title="No packages yet" description="Add your first health package to get started." />
+          <EmptyState
+            title={search ? "No matching packages" : "No packages yet"}
+            description={search ? "Try a different search term." : "Add your first health package to get started."}
+          />
         )}
         {!loading && !error && packages.length > 0 && (
           <>
