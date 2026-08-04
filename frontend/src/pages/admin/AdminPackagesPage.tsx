@@ -47,7 +47,7 @@ export default function AdminPackagesPage() {
     setError(null);
     try {
       const data = await adminListPackagesPaginated({
-        search: search || undefined,
+        search: search.trim() || undefined,
         page,
         page_size: PAGE_SIZE,
       });

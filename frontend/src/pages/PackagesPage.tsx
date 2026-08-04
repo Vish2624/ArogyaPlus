@@ -35,7 +35,7 @@ export default function PackagesPage() {
     setError(null);
     try {
       const data = await listPackagesPaginated({
-        search: search || undefined,
+        search: search.trim() || undefined,
         category: category || undefined,
         sort: sort || undefined,
         page,

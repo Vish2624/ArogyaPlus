@@ -34,7 +34,7 @@ export default function AdminParametersPage() {
     setError(null);
     try {
       const result = await adminListParametersPaginated({
-        search: search || undefined,
+        search: search.trim() || undefined,
         page,
         page_size: PAGE_SIZE,
       });

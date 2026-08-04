@@ -49,7 +49,7 @@ export default function AdminTestsPage() {
     setError(null);
     try {
       const data = await adminListTestsPaginated({
-        search: search || undefined,
+        search: search.trim() || undefined,
         page,
         page_size: PAGE_SIZE,
       });

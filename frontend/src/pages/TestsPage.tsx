@@ -33,7 +33,7 @@ export default function TestsPage() {
     setError(null);
     try {
       const data = await listTestsPaginated({
-        search: search || undefined,
+        search: search.trim() || undefined,
         category: category || undefined,
         sort: sort || undefined,
         page,

@@ -47,7 +47,7 @@ export default function AdminBookingsPage() {
     setError(null);
     try {
       const result = await adminListBookings({
-        search: search || undefined,
+        search: search.trim() || undefined,
         status_filter: statusFilter || undefined,
         booking_date: dateFilter || undefined,
         page,
