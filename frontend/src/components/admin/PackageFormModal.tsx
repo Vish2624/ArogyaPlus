@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Search } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -149,10 +149,13 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="form-label" htmlFor="pkg-category">Category</label>
-            <select id="pkg-category" className="form-input" {...register("category")}>
-              <option value="">— Select a category —</option>
-              {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <div className="relative">
+              <select id="pkg-category" className="form-input w-full appearance-none pr-9" {...register("category")}>
+                <option value="">— Select a category —</option>
+                {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
+            </div>
           </div>
           <div>
             <label className="form-label" htmlFor="pkg-image">Icon Image</label>
@@ -204,19 +207,22 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
 
         <div>
           <label className="form-label" htmlFor="pkg-fasting">Fasting Requirement</label>
-          <select
-            id="pkg-fasting"
-            className="form-input"
-            value={fastingRequired === true ? "fasting_required" : fastingRequired === false ? "non_fasting" : ""}
-            onChange={(e) => {
-              const v = e.target.value;
-              setValue("fasting_required", v === "fasting_required" ? true : v === "non_fasting" ? false : null);
-            }}
-          >
-            <option value="">— Not specified —</option>
-            <option value="fasting_required">Fasting Required</option>
-            <option value="non_fasting">Non Fasting</option>
-          </select>
+          <div className="relative">
+            <select
+              id="pkg-fasting"
+              className="form-input w-full appearance-none pr-9"
+              value={fastingRequired === true ? "fasting_required" : fastingRequired === false ? "non_fasting" : ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                setValue("fasting_required", v === "fasting_required" ? true : v === "non_fasting" ? false : null);
+              }}
+            >
+              <option value="">— Not specified —</option>
+              <option value="fasting_required">Fasting Required</option>
+              <option value="non_fasting">Non Fasting</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
+          </div>
         </div>
 
         <div>
