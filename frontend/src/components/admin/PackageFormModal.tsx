@@ -55,6 +55,12 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
 
   const imageUrl = watch("image_url");
   const fastingRequired = watch("fasting_required");
+  const category = watch("category");
+  const categoryOptions = useMemo(() => {
+    const options: string[] = [...PACKAGE_CATEGORIES];
+    if (category && !options.includes(category)) options.unshift(category);
+    return options;
+  }, [category]);
 
   useEffect(() => {
     if (!open) return;
@@ -143,10 +149,10 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="form-label" htmlFor="pkg-category">Category</label>
-            <input id="pkg-category" className="form-input" list="pkg-category-options" placeholder="Select or type a category" {...register("category")} />
-            <datalist id="pkg-category-options">
-              {PACKAGE_CATEGORIES.map((c) => <option key={c} value={c} />)}
-            </datalist>
+            <select id="pkg-category" className="form-input" {...register("category")}>
+              <option value="">— Select a category —</option>
+              {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
           <div>
             <label className="form-label" htmlFor="pkg-image">Icon Image</label>

@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 const BADGES = [
   { title: "NABH Accredited Labs", subtitle: "Government certified" },
   { title: "HIPAA Compliant", subtitle: "Your data is safe" },
-  { title: "Free Home Collection", subtitle: "At your doorstep" },
+  { title: "Home Collection Available", subtitle: "At your doorstep" },
   { title: "Digital Reports in 48h", subtitle: "With doctor review" },
 ];
 

@@ -41,7 +41,7 @@ export default function CartList() {
               )}
             </div>
             <div className="flex items-center gap-3">
-              <p className="text-slate-900">
+              <p className="w-20 shrink-0 text-right tabular-nums text-slate-900">
                 <span className="text-xs font-semibold text-slate-500">{currency}</span>{" "}
                 <span className="text-sm font-bold">{amount}</span>
               </p>
@@ -69,7 +69,7 @@ export default function CartList() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <p className="text-slate-900">
+              <p className="w-20 shrink-0 text-right tabular-nums text-slate-900">
                 <span className="text-xs font-semibold text-slate-500">AED</span>{" "}
                 <span className="text-sm font-bold">{HOME_COLLECTION_FEE.toFixed(2)}</span>
               </p>

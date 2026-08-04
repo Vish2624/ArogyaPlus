@@ -59,6 +59,12 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
 
   const imageUrl = watch("image_url");
   const fastingRequired = watch("fasting_required");
+  const category = watch("category");
+  const categoryOptions = useMemo(() => {
+    const options: string[] = [...TEST_CATEGORIES];
+    if (category && !options.includes(category)) options.unshift(category);
+    return options;
+  }, [category]);
 
   useEffect(() => {
     if (!open) return;
@@ -172,10 +178,10 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="form-label" htmlFor="test-category">Category</label>
-            <input id="test-category" className="form-input" list="test-category-options" placeholder="Select or type a category" {...register("category")} />
-            <datalist id="test-category-options">
-              {TEST_CATEGORIES.map((c) => <option key={c} value={c} />)}
-            </datalist>
+            <select id="test-category" className="form-input" {...register("category")}>
+              <option value="">— Select a category —</option>
+              {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
           <div>
             <label className="form-label" htmlFor="test-tat">Report TAT</label>

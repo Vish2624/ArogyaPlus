@@ -40,7 +40,7 @@ export default function AdminTestsPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
+    if (page > totalPages) setPage(Math.max(1, totalPages));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPages]);
 

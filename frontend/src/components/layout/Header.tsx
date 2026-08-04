@@ -10,7 +10,7 @@ import { useCartStore } from "@/store/cartStore";
 import { CONTACT, NAV_LINKS } from "@/utils/constants";
 
 const SCROLL_THRESHOLD = 150;
-const OFFER_TEXT = "Free Home Sample Collection";
+const OFFER_TEXT = "Home Collection Available";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);

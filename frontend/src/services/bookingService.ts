@@ -36,6 +36,27 @@ export async function adminListBookings(query: AdminBookingQuery = {}): Promise<
   return { ...data, items: data.items.map(normalizeBooking) };
 }
 
+/**
+ * Walks every page rather than trusting a single large `page_size` request, since the backend
+ * may cap it below what's asked for. Used for CSV export, which must cover every matching
+ * booking, not just the page currently on screen.
+ */
+export async function adminListAllBookings(
+  query: Omit<AdminBookingQuery, "page" | "page_size"> = {}
+): Promise<Booking[]> {
+  const all: Booking[] = [];
+  let page = 1;
+  for (;;) {
+    const { data } = await api.get<PaginatedResponse<Booking>>("/admin/bookings", {
+      params: { ...query, page, page_size: 100 },
+    });
+    all.push(...data.items.map(normalizeBooking));
+    if (data.items.length === 0 || page >= data.total_pages) break;
+    page += 1;
+  }
+  return all;
+}
+
 export async function adminGetBooking(id: number): Promise<Booking> {
   const { data } = await api.get<Booking>(`/admin/bookings/${id}`);
   return normalizeBooking(data);

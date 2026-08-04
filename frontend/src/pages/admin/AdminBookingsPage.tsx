@@ -8,7 +8,7 @@ import ErrorState from "@/components/common/ErrorState";
 import Pagination from "@/components/common/Pagination";
 import Spinner from "@/components/common/Spinner";
 import { getApiErrorMessage } from "@/services/api";
-import { adminListBookings, adminUpdateBookingStatus } from "@/services/bookingService";
+import { adminListAllBookings, adminListBookings, adminUpdateBookingStatus } from "@/services/bookingService";
 import { adminListPackages } from "@/services/packageService";
 import { adminListTests } from "@/services/testService";
 import type { Booking, BookingStatus } from "@/types/booking";
@@ -33,6 +33,7 @@ export default function AdminBookingsPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [itemMeta, setItemMeta] = useState(() => buildItemMetaLookup([], []));
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [exportingCsv, setExportingCsv] = useState(false);
 
   useEffect(() => {
     Promise.all([adminListTests(), adminListPackages()])
@@ -80,6 +81,22 @@ export default function AdminBookingsPage() {
     }
   };
 
+  const handleExportCsv = async () => {
+    setExportingCsv(true);
+    try {
+      const allBookings = await adminListAllBookings({
+        search: search.trim() || undefined,
+        status_filter: statusFilter || undefined,
+        booking_date: dateFilter || undefined,
+      });
+      downloadBookingsCsv(allBookings, itemMeta);
+    } catch (err) {
+      window.alert(getApiErrorMessage(err, "Could not export bookings. Please try again."));
+    } finally {
+      setExportingCsv(false);
+    }
+  };
+
   const handleDownloadPdf = async (booking: Booking) => {
     setDownloadingId(booking.id);
     try {
@@ -101,12 +118,12 @@ export default function AdminBookingsPage() {
         </div>
         <button
           type="button"
-          onClick={() => downloadBookingsCsv(bookings, itemMeta)}
-          disabled={bookings.length === 0}
+          onClick={handleExportCsv}
+          disabled={bookings.length === 0 || exportingCsv}
           className="btn-secondary !px-4 !py-2 !text-sm disabled:opacity-40"
         >
           <Download className="h-4 w-4" aria-hidden="true" />
-          Export CSV
+          {exportingCsv ? "Exporting..." : "Export CSV"}
         </button>
       </div>
 

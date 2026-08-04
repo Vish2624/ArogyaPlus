@@ -5,7 +5,7 @@ export const CONTACT = {
   whatsapp: "+971 58 580 2248",
   whatsappLink: "https://wa.me/971585802248",
   email: "support@arogyaplus.com",
-  address: "Al Wasl Road, Jumeirah, Dubai, United Arab Emirates",
+  address: "First Floor, M-4, Gold Building, Near Bus Stand, Al Karama, Dubai, United Arab Emirates",
 };
 
 export const NAV_LINKS = [

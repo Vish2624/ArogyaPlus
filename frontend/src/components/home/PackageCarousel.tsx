@@ -12,7 +12,7 @@ interface PackageCarouselProps {
 
 const TITLE = "Popular Health Packages";
 const DESCRIPTION =
-  "Preventive care and early detection from certified labs - with free home sample collection and digital reports delivered in 48 hours.";
+  "Preventive care and early detection from certified labs - with home sample collection available and digital reports delivered in 48 hours.";
 
 export default function PackageCarousel({ packages, onViewDetails }: PackageCarouselProps) {
   if (packages.length === 0) return null;

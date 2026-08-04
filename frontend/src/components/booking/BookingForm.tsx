@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import { AlertTriangle, Clock, MapPin, Wallet } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import VisitModeSelector from "@/components/booking/VisitModeSelector";
@@ -11,7 +11,7 @@ import { createBooking } from "@/services/bookingService";
 import { getApiErrorMessage } from "@/services/api";
 import { useCartStore } from "@/store/cartStore";
 import type { BookingCreatedResponse } from "@/types/booking";
-import { todayISODate } from "@/utils/formatters";
+import { isTimeSlotPast, todayISODate } from "@/utils/formatters";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
 
 interface BookingFormProps {
@@ -35,6 +35,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
     control,
     setValue,
     watch,
+    resetField,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -52,6 +53,27 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
 
   const visitModeValue = watch("visit_mode");
   const homeCollectionMismatch = visitModeValue === "home" && !homeCollectionAdded;
+
+  // Home Collection Fee only applies to Home Visit — covers the case where it was added to the
+  // cart (e.g. from the cart page) while Lab Visit was already the selected/default mode, not
+  // just an explicit switch away from Home Visit.
+  useEffect(() => {
+    if (visitModeValue === "lab" && homeCollectionAdded) {
+      removeHomeCollection();
+    }
+  }, [visitModeValue, homeCollectionAdded, removeHomeCollection]);
+
+  const preferredDateValue = watch("preferred_date");
+  const timeSlotValue = watch("time_slot");
+
+  // Clears a previously-picked slot if it falls behind the "at least 1 hour from now, UAE time"
+  // cutoff — either because the clock ticked past it while the form was open, or the date was
+  // changed back to today after a slot from a future date was selected.
+  useEffect(() => {
+    if (timeSlotValue && isTimeSlotPast(preferredDateValue, timeSlotValue)) {
+      resetField("time_slot");
+    }
+  }, [preferredDateValue, timeSlotValue, resetField]);
 
   const onSubmit = async (values: BookingFormValues) => {
     if (homeCollectionMismatch) {
@@ -240,7 +262,13 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
         <Controller
           name="time_slot"
           control={control}
-          render={({ field }) => <TimeSlotPicker value={field.value} onChange={(slot) => setValue("time_slot", slot, { shouldValidate: true })} />}
+          render={({ field }) => (
+            <TimeSlotPicker
+              value={field.value}
+              onChange={(slot) => setValue("time_slot", slot, { shouldValidate: true })}
+              preferredDate={preferredDateValue}
+            />
+          )}
         />
         {errors.time_slot && <p className="form-error">{errors.time_slot.message}</p>}
       </div>
