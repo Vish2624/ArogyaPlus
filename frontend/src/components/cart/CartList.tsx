@@ -7,6 +7,7 @@ import { formatCurrency } from "@/utils/formatters";
 
 export default function CartList() {
   const items = useCartStore((s) => s.items);
+  const visitMode = useCartStore((s) => s.visitMode);
   const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);
   const addHomeCollection = useCartStore((s) => s.addHomeCollection);
   const removeHomeCollection = useCartStore((s) => s.removeHomeCollection);
@@ -24,7 +25,7 @@ export default function CartList() {
   return (
     <ul className="divide-y divide-slate-100">
       {items.map((item) => {
-        const [currency, amount] = formatCurrency(itemPrice(item)).split(" ");
+        const [currency, amount] = formatCurrency(itemPrice(item, visitMode)).split(" ");
         return (
           <li key={`${item.type}-${item.id}`} className="flex items-center justify-between gap-4 py-4">
             <div>

@@ -1,0 +1,11 @@
+# React Router uses client-side (HTML5 history) routing, so a direct request or refresh on a
+# route like /admin has no matching file on the server. Fall back to index.html for anything
+# that isn't a real file/directory, and let the app's router take it from there.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
