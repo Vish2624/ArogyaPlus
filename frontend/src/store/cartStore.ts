@@ -63,7 +63,13 @@ export const useCartStore = create<CartState>()(
         set({ items: get().items.filter((i) => !(i.type === type && i.id === id)) });
       },
 
-      clearCart: () => set({ items: [], homeCollectionAdded: false }),
+      /**
+       * Resets `visitMode` back to the "lab" default too, not just items/fee — otherwise a
+       * "home" visit mode chosen for one booking would silently persist into the next shopping
+       * session (via localStorage) and reprice everything at home rates before the customer
+       * ever chose that again.
+       */
+      clearCart: () => set({ items: [], homeCollectionAdded: false, visitMode: "lab" }),
 
       setVisitMode: (mode) => set({ visitMode: mode }),
 

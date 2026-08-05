@@ -81,6 +81,25 @@ export interface BookingCreatedResponse {
   message: string;
 }
 
+export interface BookingConfirmationItem {
+  name: string;
+  type: CartItemType;
+  price: number;
+}
+
+/**
+ * Everything the post-booking confirmation screen needs to show an itemized order summary.
+ * Built from the cart snapshot at submit time (before `clearCart()` runs), since the backend's
+ * `201` response is just a lightweight reference/total/status/message with no item breakdown.
+ */
+export interface BookingConfirmation {
+  response: BookingCreatedResponse;
+  items: BookingConfirmationItem[];
+  visitMode: VisitMode;
+  subtotal: number;
+  homeCollectionFee: number;
+}
+
 export interface DashboardStats {
   total_packages: number;
   total_tests: number;

@@ -8,13 +8,13 @@ import BookingSuccess from "@/components/booking/BookingSuccess";
 import CartList from "@/components/cart/CartList";
 import EmptyState from "@/components/common/EmptyState";
 import { useCartStore, useCartTotal } from "@/store/cartStore";
-import type { BookingCreatedResponse } from "@/types/booking";
+import type { BookingConfirmation } from "@/types/booking";
 import { formatCurrency } from "@/utils/formatters";
 
 export default function BookingPage() {
   const items = useCartStore((s) => s.items);
   const total = useCartTotal();
-  const [completedBooking, setCompletedBooking] = useState<BookingCreatedResponse | null>(null);
+  const [completedBooking, setCompletedBooking] = useState<BookingConfirmation | null>(null);
 
   if (completedBooking) {
     return (

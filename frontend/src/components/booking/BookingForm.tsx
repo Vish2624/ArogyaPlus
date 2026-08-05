@@ -9,14 +9,14 @@ import PaymentModeSelector from "@/components/booking/PaymentModeSelector";
 import TimeSlotPicker from "@/components/booking/TimeSlotPicker";
 import { createBooking } from "@/services/bookingService";
 import { getApiErrorMessage } from "@/services/api";
-import { useCartStore } from "@/store/cartStore";
-import type { BookingCreatedResponse } from "@/types/booking";
-import { withHomeCollectionFee } from "@/utils/bookingTotal";
+import { itemPrice, useCartStore } from "@/store/cartStore";
+import type { BookingConfirmation } from "@/types/booking";
+import { HOME_COLLECTION_FEE } from "@/utils/constants";
 import { isTimeSlotPast, todayISODate } from "@/utils/formatters";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
 
 interface BookingFormProps {
-  onSuccess: (response: BookingCreatedResponse) => void;
+  onSuccess: (confirmation: BookingConfirmation) => void;
 }
 
 export default function BookingForm({ onSuccess }: BookingFormProps) {
@@ -89,10 +89,24 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
         phone: `${country_code}${phone}`,
         items: items.map((item) => ({ item_type: item.type, item_id: item.id })),
       });
+
+      // Snapshot the cart's pricing before clearCart() wipes it — the backend's response has no
+      // item breakdown, so the confirmation screen's order summary is built from this instead.
+      const summaryItems = items.map((item) => ({
+        name: item.name,
+        type: item.type,
+        price: itemPrice(item, values.visit_mode),
+      }));
+      const subtotal = summaryItems.reduce((sum, item) => sum + item.price, 0);
+      const homeCollectionFee = values.visit_mode === "home" ? HOME_COLLECTION_FEE : 0;
+
       clearCart();
       onSuccess({
-        ...response,
-        total_amount: withHomeCollectionFee(response.total_amount, values.visit_mode),
+        response: { ...response, total_amount: subtotal + homeCollectionFee },
+        items: summaryItems,
+        visitMode: values.visit_mode,
+        subtotal,
+        homeCollectionFee,
       });
     } catch (error) {
       setSubmitError(getApiErrorMessage(error, "We couldn't submit your booking. Please try again."));
