@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, Eye, Star } from "lucide-react";
+import { CheckCircle2, ChevronLeft, ChevronRight, Eye, Star, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -174,15 +174,15 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
                       {featuredPackage.tests.length} {featuredPackage.tests.length === 1 ? "test" : "tests"} included
                     </div>
 
-                    <div className="mt-2.5 grid grid-cols-2 gap-2 sm:mt-4 sm:gap-3">
-                      <div className="rounded-full border border-slate-100 bg-slate-50 p-2 text-center sm:p-3.5">
-                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[10px]">Lab Visit</p>
+                    <div className="mt-2.5 flex items-center justify-between rounded-full border border-slate-100 bg-slate-50 p-2 sm:mt-4 sm:p-3.5">
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[10px]">Price</p>
                         <p className="text-xs font-bold text-slate-900 sm:text-base">{formatCurrency(featuredPackage.lab_price)}</p>
                       </div>
-                      <div className="rounded-full border border-slate-100 bg-slate-50 p-2 text-center sm:p-3.5">
-                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[10px]">Home Visit</p>
-                        <p className="text-xs font-bold text-slate-900 sm:text-base">{formatCurrency(featuredPackage.home_price)}</p>
-                      </div>
+                      <span className="flex items-center gap-1 pr-2 text-[10px] font-semibold text-primary-600 sm:text-[11px]">
+                        <Truck className="h-3 w-3" aria-hidden="true" />
+                        Home collection available
+                      </span>
                     </div>
 
                     <div className="mt-2.5 flex gap-2 sm:mt-4">

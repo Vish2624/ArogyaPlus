@@ -40,9 +40,11 @@ interface CartState {
   toggleDrawer: () => void;
 }
 
-function itemPrice(item: CartItem, visitMode: VisitMode): number {
-  const price = visitMode === "home" ? item.homePrice : item.labPrice;
-  return Number.isFinite(price) ? price : 0;
+// Every item costs its lab price regardless of visit mode — Home Visit only ever adds the
+// flat HOME_COLLECTION_FEE on top (see `homeCollectionAdded`). There is no separate per-item
+// home-visit price.
+function itemPrice(item: CartItem): number {
+  return Number.isFinite(item.labPrice) ? item.labPrice : 0;
 }
 
 export const useCartStore = create<CartState>()(
@@ -98,9 +100,8 @@ export const useCartStore = create<CartState>()(
 
 export function useCartTotal(): number {
   const items = useCartStore((s) => s.items);
-  const visitMode = useCartStore((s) => s.visitMode);
   const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);
-  const subtotal = items.reduce((sum, item) => sum + itemPrice(item, visitMode), 0);
+  const subtotal = items.reduce((sum, item) => sum + itemPrice(item), 0);
   return subtotal + (homeCollectionAdded && items.length > 0 ? HOME_COLLECTION_FEE : 0);
 }
 

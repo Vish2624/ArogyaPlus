@@ -26,9 +26,7 @@ const DEFAULTS: PackageFormValues = {
   category: "",
   image_url: "",
   lab_price: 0,
-  home_price: 0,
   original_lab_price: undefined,
-  original_home_price: undefined,
   tat: "",
   fasting_required: null,
   is_active: true,
@@ -75,9 +73,7 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
             category: initialPackage.category ?? "",
             image_url: initialPackage.image_url ?? "",
             lab_price: initialPackage.lab_price,
-            home_price: initialPackage.home_price,
             original_lab_price: initialPackage.original_lab_price ?? undefined,
-            original_home_price: initialPackage.original_home_price ?? undefined,
             tat: initialPackage.tat ?? "",
             fasting_required: initialPackage.fasting_required ?? null,
             is_active: initialPackage.is_active,
@@ -179,30 +175,23 @@ export default function PackageFormModal({ open, onClose, onSubmit, initialPacka
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="form-label" htmlFor="pkg-lab-price">Lab Visit Price (AED)</label>
+            <label className="form-label" htmlFor="pkg-lab-price">Price (AED)</label>
             <input id="pkg-lab-price" type="number" step="0.01" min={0} className="form-input" {...register("lab_price")} />
             {errors.lab_price && <p className="form-error">{errors.lab_price.message}</p>}
-          </div>
-          <div>
-            <label className="form-label" htmlFor="pkg-home-price">Home Visit Price (AED)</label>
-            <input id="pkg-home-price" type="number" step="0.01" min={0} className="form-input" {...register("home_price")} />
-            {errors.home_price && <p className="form-error">{errors.home_price.message}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="form-label" htmlFor="pkg-original-lab-price">Original Lab Price (optional)</label>
-            <p className="mb-1.5 text-xs text-slate-500">
-              Set this higher than the Lab Visit Price to show a strikethrough discount badge on the public site.
-            </p>
-            <input id="pkg-original-lab-price" type="number" step="0.01" min={0} className="form-input" {...register("original_lab_price")} />
-            {errors.original_lab_price && <p className="form-error">{errors.original_lab_price.message}</p>}
           </div>
           <div>
             <label className="form-label" htmlFor="pkg-tat">Report Time</label>
             <input id="pkg-tat" className="form-input" placeholder="e.g. 24 hours" {...register("tat")} />
           </div>
+        </div>
+
+        <div>
+          <label className="form-label" htmlFor="pkg-original-lab-price">Original Price (optional)</label>
+          <p className="mb-1.5 text-xs text-slate-500">
+            Set this higher than the Price to show a strikethrough discount badge on the public site.
+          </p>
+          <input id="pkg-original-lab-price" type="number" step="0.01" min={0} className="form-input" {...register("original_lab_price")} />
+          {errors.original_lab_price && <p className="form-error">{errors.original_lab_price.message}</p>}
         </div>
 
         <div>

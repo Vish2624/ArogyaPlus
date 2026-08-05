@@ -15,7 +15,6 @@ export default function CartDrawer() {
   const open = useCartStore((s) => s.drawerOpen);
   const closeDrawer = useCartStore((s) => s.closeDrawer);
   const items = useCartStore((s) => s.items);
-  const visitMode = useCartStore((s) => s.visitMode);
   const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);
   const total = useCartTotal();
   const totalAmount = Number.isFinite(total)
@@ -67,7 +66,7 @@ export default function CartDrawer() {
 
   const whatsAppHref = () => {
     const lines = items.map(
-      (item) => `- ${item.name} (${item.type === "package" ? "Package" : "Test"}) — ${formatCurrency(itemPrice(item, visitMode))}`
+      (item) => `- ${item.name} (${item.type === "package" ? "Package" : "Test"}) — ${formatCurrency(itemPrice(item))}`
     );
     if (homeCollectionAdded) {
       lines.push(`- Home Collection Fee — AED 75.00`);

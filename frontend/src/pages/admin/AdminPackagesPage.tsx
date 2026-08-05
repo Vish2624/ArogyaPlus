@@ -85,11 +85,15 @@ export default function AdminPackagesPage() {
   };
 
   const handleSubmit = async (values: PackageFormValues) => {
+    // The backend still requires home_price/original_home_price fields even though the admin
+    // form no longer exposes a separate home price — mirror the single price into both so it's
+    // functionally "one price" without needing a backend change.
+    const payload = { ...values, home_price: values.lab_price, original_home_price: values.original_lab_price ?? null };
     if (editingPackage) {
-      const updated = await adminUpdatePackage(editingPackage.id, values);
+      const updated = await adminUpdatePackage(editingPackage.id, payload);
       setPackages((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     } else {
-      const created = await adminCreatePackage(values);
+      const created = await adminCreatePackage(payload);
       setTotalRows((n) => n + 1);
       if (packages.length < PAGE_SIZE) {
         setPackages((prev) => [...prev, created]);
@@ -199,8 +203,7 @@ export default function AdminPackagesPage() {
                   <th className="w-8 px-2 py-3" aria-hidden="true" />
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Category</th>
-                  <th className="px-4 py-3">Lab Price</th>
-                  <th className="px-4 py-3">Home Price</th>
+                  <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">Tests</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3 text-right">Actions</th>
@@ -227,7 +230,6 @@ export default function AdminPackagesPage() {
                     </td>
                     <td className="px-4 py-3 text-slate-500">{pkg.category ?? "-"}</td>
                     <td className="px-4 py-3 text-slate-600">{formatCurrency(pkg.lab_price)}</td>
-                    <td className="px-4 py-3 text-slate-600">{formatCurrency(pkg.home_price)}</td>
                     <td className="px-4 py-3 text-slate-500">{pkg.tests.length}</td>
                     <td className="px-4 py-3">
                       <button

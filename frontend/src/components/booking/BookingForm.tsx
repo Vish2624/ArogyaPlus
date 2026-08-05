@@ -95,7 +95,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
       const summaryItems = items.map((item) => ({
         name: item.name,
         type: item.type,
-        price: itemPrice(item, values.visit_mode),
+        price: itemPrice(item),
       }));
       const subtotal = summaryItems.reduce((sum, item) => sum + item.price, 0);
       const homeCollectionFee = values.visit_mode === "home" ? HOME_COLLECTION_FEE : 0;

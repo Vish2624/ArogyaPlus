@@ -29,9 +29,7 @@ const DEFAULTS: TestFormValues = {
   sample_type: "",
   image_url: "",
   lab_price: 0,
-  home_price: 0,
   original_lab_price: undefined,
-  original_home_price: undefined,
   tat: "",
   fasting_required: null,
   is_active: true,
@@ -83,9 +81,7 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
             sample_type: initialTest.sample_type ?? "",
             image_url: initialTest.image_url ?? "",
             lab_price: initialTest.lab_price,
-            home_price: initialTest.home_price,
             original_lab_price: initialTest.original_lab_price ?? undefined,
-            original_home_price: initialTest.original_home_price ?? undefined,
             tat: initialTest.tat ?? "",
             fasting_required: initialTest.fasting_required ?? null,
             is_active: initialTest.is_active,
@@ -295,23 +291,16 @@ export default function TestFormModal({ open, onClose, onSubmit, initialTest }: 
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="form-label" htmlFor="test-lab-price">Lab Visit Price (AED)</label>
-            <input id="test-lab-price" type="number" step="0.01" min={0} className="form-input" {...register("lab_price")} />
-            {errors.lab_price && <p className="form-error">{errors.lab_price.message}</p>}
-          </div>
-          <div>
-            <label className="form-label" htmlFor="test-home-price">Home Visit Price (AED)</label>
-            <input id="test-home-price" type="number" step="0.01" min={0} className="form-input" {...register("home_price")} />
-            {errors.home_price && <p className="form-error">{errors.home_price.message}</p>}
-          </div>
+        <div>
+          <label className="form-label" htmlFor="test-lab-price">Price (AED)</label>
+          <input id="test-lab-price" type="number" step="0.01" min={0} className="form-input" {...register("lab_price")} />
+          {errors.lab_price && <p className="form-error">{errors.lab_price.message}</p>}
         </div>
 
         <div>
-          <label className="form-label" htmlFor="test-original-lab-price">Original Lab Price (optional)</label>
+          <label className="form-label" htmlFor="test-original-lab-price">Original Price (optional)</label>
           <p className="mb-1.5 text-xs text-slate-500">
-            Set this higher than the Lab Visit Price to show a strikethrough discount badge on the public site.
+            Set this higher than the Price to show a strikethrough discount badge on the public site.
           </p>
           <input id="test-original-lab-price" type="number" step="0.01" min={0} className="form-input" {...register("original_lab_price")} />
           {errors.original_lab_price && <p className="form-error">{errors.original_lab_price.message}</p>}

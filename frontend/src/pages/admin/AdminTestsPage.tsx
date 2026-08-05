@@ -87,7 +87,11 @@ export default function AdminTestsPage() {
   };
 
   const handleSubmit = async (values: TestFormValues, parameterIds: number[]) => {
-    let test = editingTest ? await adminUpdateTest(editingTest.id, values) : await adminCreateTest(values);
+    // The backend still requires home_price/original_home_price fields even though the admin
+    // form no longer exposes a separate home price — mirror the single price into both so it's
+    // functionally "one price" without needing a backend change.
+    const payload = { ...values, home_price: values.lab_price, original_home_price: values.original_lab_price ?? null };
+    let test = editingTest ? await adminUpdateTest(editingTest.id, payload) : await adminCreateTest(payload);
 
     const currentIds = new Set(test.parameters.map((p) => p.id));
     const toAdd = parameterIds.filter((id) => !currentIds.has(id));
@@ -225,8 +229,7 @@ export default function AdminTestsPage() {
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3">Sample Type</th>
                   <th className="px-4 py-3">TAT</th>
-                  <th className="px-4 py-3">Lab Price</th>
-                  <th className="px-4 py-3">Home Price</th>
+                  <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
@@ -251,7 +254,6 @@ export default function AdminTestsPage() {
                     <td className="px-4 py-3 text-slate-500">{test.sample_type ?? "-"}</td>
                     <td className="px-4 py-3 text-slate-500">{test.tat ?? "-"}</td>
                     <td className="px-4 py-3 text-slate-600">{formatCurrency(test.lab_price)}</td>
-                    <td className="px-4 py-3 text-slate-600">{formatCurrency(test.home_price)}</td>
                     <td className="px-4 py-3">
                       <button
                         type="button"
