@@ -15,6 +15,7 @@ import type { Booking, BookingStatus } from "@/types/booking";
 import { buildItemMetaLookup } from "@/utils/bookingItemMeta";
 import { downloadBookingsCsv } from "@/utils/bookingCsv";
 import { downloadBookingPdf } from "@/utils/bookingPdf";
+import { withHomeCollectionFee } from "@/utils/bookingTotal";
 import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
 
 const STATUS_OPTIONS: BookingStatus[] = ["New", "Contacted", "Done"];
@@ -196,7 +197,7 @@ export default function AdminBookingsPage() {
                       </td>
                       <td className="px-4 py-3 capitalize text-slate-500">{booking.visit_mode}</td>
                       <td className="px-4 py-3 text-slate-500">{formatDate(booking.preferred_date)}<div className="text-xs">{booking.time_slot}</div></td>
-                      <td className="px-4 py-3 font-medium text-slate-800">{formatCurrency(booking.total_amount)}</td>
+                      <td className="px-4 py-3 font-medium text-slate-800">{formatCurrency(withHomeCollectionFee(booking.total_amount, booking.visit_mode))}</td>
                       <td className="px-4 py-3"><BookingStatusBadge status={booking.status} /></td>
                       <td className="px-4 py-3 text-xs text-slate-500">{formatDateTime(booking.created_at)}</td>
                       <td className="px-4 py-3">

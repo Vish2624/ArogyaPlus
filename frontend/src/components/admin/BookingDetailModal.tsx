@@ -6,6 +6,8 @@ import BookingStatusBadge from "@/components/admin/BookingStatusBadge";
 import type { Booking, BookingStatus } from "@/types/booking";
 import { getItemMeta, type ItemMetaLookup } from "@/utils/bookingItemMeta";
 import { downloadBookingPdf } from "@/utils/bookingPdf";
+import { withHomeCollectionFee } from "@/utils/bookingTotal";
+import { HOME_COLLECTION_FEE } from "@/utils/constants";
 import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
 
 interface BookingDetailModalProps {
@@ -67,7 +69,7 @@ export default function BookingDetailModal({ booking, onClose, onStatusChange, i
         </div>
         <div>
           <p className="text-xs text-slate-500">Total Amount</p>
-          <p className="font-bold text-slate-900">{formatCurrency(booking.total_amount)}</p>
+          <p className="font-bold text-slate-900">{formatCurrency(withHomeCollectionFee(booking.total_amount, booking.visit_mode))}</p>
         </div>
         {booking.payment_mode && (
           <div>
@@ -109,6 +111,15 @@ export default function BookingDetailModal({ booking, onClose, onStatusChange, i
               </li>
             );
           })}
+          {booking.visit_mode === "home" && (
+            <li className="flex items-start justify-between gap-3 py-2.5 text-sm">
+              <span className="text-slate-800">
+                <span className="badge mr-2 bg-primary-50 text-primary-700">fee</span>
+                Home Collection Fee
+              </span>
+              <span className="shrink-0 font-medium text-slate-800">{formatCurrency(HOME_COLLECTION_FEE)}</span>
+            </li>
+          )}
         </ul>
       </div>
 

@@ -1,5 +1,6 @@
 import type { Booking } from "@/types/booking";
 import { getItemMeta, type ItemMetaLookup } from "./bookingItemMeta";
+import { withHomeCollectionFee } from "./bookingTotal";
 import { formatCurrency, formatDate, formatDateTime } from "./formatters";
 
 const PRIMARY: [number, number, number] = [5, 150, 105];
@@ -73,7 +74,7 @@ export async function downloadBookingPdf(booking: Booking, lookup: ItemMetaLooku
       ["Visit Mode", `${booking.visit_mode === "home" ? "Home" : "Lab"} Visit`],
       ["Preferred Date", `${formatDate(booking.preferred_date)} at ${booking.time_slot}`],
     ],
-    [["Submitted", formatDateTime(booking.created_at)], ["Total Amount", formatCurrency(booking.total_amount)]],
+    [["Submitted", formatDateTime(booking.created_at)], ["Total Amount", formatCurrency(withHomeCollectionFee(booking.total_amount, booking.visit_mode))]],
   ];
   if (booking.payment_mode) {
     infoGrid.push([null, ["Payment Mode", booking.payment_mode === "cash" ? "Cash" : "Online"]]);

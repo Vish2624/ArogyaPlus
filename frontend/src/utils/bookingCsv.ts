@@ -1,5 +1,7 @@
 import type { Booking } from "@/types/booking";
 import { getItemMeta, type ItemMetaLookup } from "./bookingItemMeta";
+import { withHomeCollectionFee } from "./bookingTotal";
+import { HOME_COLLECTION_FEE } from "./constants";
 import { formatDate, formatDateTime } from "./formatters";
 
 function csvEscape(value: string | number): string {
@@ -38,6 +40,10 @@ export function downloadBookingsCsv(bookings: Booking[], lookup: ItemMetaLookup)
         return `${item.item_name} (${item.item_type}${details ? ` - ${details}` : ""}) - AED ${Number(item.price).toFixed(2)}`;
       })
       .join(" | ");
+    const itemsWithFee =
+      b.visit_mode === "home"
+        ? `${itemsSummary}${itemsSummary ? " | " : ""}Home Collection Fee - AED ${HOME_COLLECTION_FEE.toFixed(2)}`
+        : itemsSummary;
 
     return [
       b.booking_reference,
@@ -52,8 +58,8 @@ export function downloadBookingsCsv(bookings: Booking[], lookup: ItemMetaLookup)
       b.time_slot,
       b.status,
       formatDateTime(b.created_at),
-      Number(b.total_amount).toFixed(2),
-      itemsSummary,
+      withHomeCollectionFee(Number(b.total_amount), b.visit_mode).toFixed(2),
+      itemsWithFee,
     ];
   });
 

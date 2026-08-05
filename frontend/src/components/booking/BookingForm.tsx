@@ -11,6 +11,7 @@ import { createBooking } from "@/services/bookingService";
 import { getApiErrorMessage } from "@/services/api";
 import { useCartStore } from "@/store/cartStore";
 import type { BookingCreatedResponse } from "@/types/booking";
+import { withHomeCollectionFee } from "@/utils/bookingTotal";
 import { isTimeSlotPast, todayISODate } from "@/utils/formatters";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
 
@@ -89,7 +90,10 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
         items: items.map((item) => ({ item_type: item.type, item_id: item.id })),
       });
       clearCart();
-      onSuccess(response);
+      onSuccess({
+        ...response,
+        total_amount: withHomeCollectionFee(response.total_amount, values.visit_mode),
+      });
     } catch (error) {
       setSubmitError(getApiErrorMessage(error, "We couldn't submit your booking. Please try again."));
     }
