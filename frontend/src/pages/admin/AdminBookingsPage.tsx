@@ -1,5 +1,5 @@
 import { ChevronDown, Download, Eye, FileDown, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import BookingDetailModal from "@/components/admin/BookingDetailModal";
 import BookingStatusBadge from "@/components/admin/BookingStatusBadge";
@@ -44,7 +44,9 @@ export default function AdminBookingsPage() {
       });
   }, []);
 
-  const loadBookings = async () => {
+  // Memoized so its identity only changes when a value it actually captures changes - the
+  // debounce effect below depends on this function itself rather than repeating that list.
+  const loadBookings = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -63,14 +65,13 @@ export default function AdminBookingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, statusFilter, dateFilter, page]);
 
   useEffect(() => {
     const delay = search ? 300 : 0;
     const timeout = setTimeout(loadBookings, delay);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, statusFilter, dateFilter, page]);
+  }, [search, loadBookings]);
 
   const handleStatusChange = async (id: number, status: BookingStatus) => {
     try {

@@ -10,7 +10,7 @@ import TimeSlotPicker from "@/components/booking/TimeSlotPicker";
 import { createBooking } from "@/services/bookingService";
 import { getApiErrorMessage } from "@/services/api";
 import { itemPrice, useCartStore } from "@/store/cartStore";
-import type { BookingConfirmation } from "@/types/booking";
+import type { BookingConfirmation, VisitMode } from "@/types/booking";
 import { HOME_COLLECTION_FEE } from "@/utils/constants";
 import { isTimeSlotPast, todayISODate } from "@/utils/formatters";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
@@ -21,7 +21,6 @@ interface BookingFormProps {
 
 export default function BookingForm({ onSuccess }: BookingFormProps) {
   const items = useCartStore((s) => s.items);
-  const visitMode = useCartStore((s) => s.visitMode);
   const setVisitMode = useCartStore((s) => s.setVisitMode);
   const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);
   const addHomeCollection = useCartStore((s) => s.addHomeCollection);
@@ -29,6 +28,15 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
   const clearCart = useCartStore((s) => s.clearCart);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // The form's starting Visit Mode follows whatever's already true in the cart — if the
+  // customer added the Home Collection Fee from the cart page, land here on Home Visit; if
+  // they didn't, land on Lab Visit. `cartStore`'s own `visitMode` field is not the source of
+  // truth for this (it can go stale), so it's kept in sync with this derived value below instead
+  // of the other way around. Captured once via useState's lazy initializer (not read directly
+  // from `homeCollectionAdded` on every render) so it stays a stable dependency below — it must
+  // reflect the value at mount, not follow later cart changes while the form is open.
+  const [initialVisitMode] = useState<VisitMode>(() => (homeCollectionAdded ? "home" : "lab"));
 
   const {
     register,
@@ -47,22 +55,17 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
       email: "",
       address: "",
       preferred_date: todayISODate(),
-      visit_mode: visitMode,
+      visit_mode: initialVisitMode,
       payment_mode: "cash",
     },
   });
 
+  useEffect(() => {
+    setVisitMode(initialVisitMode);
+  }, [setVisitMode, initialVisitMode]);
+
   const visitModeValue = watch("visit_mode");
   const homeCollectionMismatch = visitModeValue === "home" && !homeCollectionAdded;
-
-  // Home Collection Fee only applies to Home Visit — covers the case where it was added to the
-  // cart (e.g. from the cart page) while Lab Visit was already the selected/default mode, not
-  // just an explicit switch away from Home Visit.
-  useEffect(() => {
-    if (visitModeValue === "lab" && homeCollectionAdded) {
-      removeHomeCollection();
-    }
-  }, [visitModeValue, homeCollectionAdded, removeHomeCollection]);
 
   const preferredDateValue = watch("preferred_date");
   const timeSlotValue = watch("time_slot");
@@ -244,7 +247,7 @@ export default function BookingForm({ onSuccess }: BookingFormProps) {
         <div className="sm:col-span-2">
           <label htmlFor="address" className="form-label">Address</label>
           <p className="mb-1.5 -mt-1 text-xs text-slate-500">
-            {visitMode === "home"
+            {visitModeValue === "home"
               ? "Where should our phlebotomist collect the sample?"
               : "Used for your booking record and to help you find the nearest partner lab."}
           </p>

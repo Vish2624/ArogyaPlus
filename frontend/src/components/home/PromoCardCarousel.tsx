@@ -3,11 +3,9 @@ import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-// Placeholder images, kept as local files so they can be swapped by simply replacing
-// each file with a real photo (same filename) — no admin upload flow needed.
-import promoPartnerImage from "@/assets/promo-partner-card.svg";
-import promoCorporateImage from "@/assets/promo-corporate-card.svg";
-import promoHomeVisitImage from "@/assets/promo-homevisit-card.svg";
+import promoPartnerImage from "@/assets/promo-partner-clinic.jpg";
+import promoCorporateImage from "@/assets/promo-corporate-team.jpg";
+import promoHomeVisitImage from "@/assets/promo-homevisit-bloodtest.jpg";
 import { CONTACT } from "@/utils/constants";
 
 interface PromoCard {
@@ -110,7 +108,7 @@ export default function PromoCardCarousel() {
                 </Link>
               )}
             </div>
-            <div className="min-h-[240px] sm:min-h-[320px]">
+            <div className="h-60 sm:h-auto">
               <img src={card.imageUrl} alt={card.title} className="h-full w-full object-cover" />
             </div>
           </div>
@@ -129,15 +127,21 @@ export default function PromoCardCarousel() {
               <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
                   {CARDS.map((c, i) => (
+                    // The visual dot stays small; the button's own box (via p-2) is what gives
+                    // it a real touch target instead of a 6x6px hit area.
                     <button
                       key={c.id}
                       type="button"
                       onClick={() => goTo(i)}
                       aria-label={`Go to card ${i + 1}`}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        i === slide ? "w-5 bg-primary-600" : "w-1.5 bg-slate-300"
-                      }`}
-                    />
+                      className="flex items-center justify-center p-2"
+                    >
+                      <span
+                        className={`block h-1.5 rounded-full transition-all duration-300 ${
+                          i === slide ? "w-5 bg-primary-600" : "w-1.5 bg-slate-300"
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
                 <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-bold text-white">

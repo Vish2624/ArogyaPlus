@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import QuickSearchBar from "./QuickSearchBar";
-import heroFamilyImage from "@/assets/hero-family.jpg";
 import { useCartStore } from "@/store/cartStore";
 import { useToastStore } from "@/store/toastStore";
 import type { Banner } from "@/types/banner";
@@ -14,6 +13,7 @@ interface HeroProps {
   banners: Banner[];
   featuredPackage: Package | null;
   onViewDetails: (pkg: Package) => void;
+  loading?: boolean;
 }
 
 const HERO_EYEBROW = "Trusted by 50,000+ Families";
@@ -21,10 +21,25 @@ const HERO_TITLE = "Comprehensive Healthcare, Made Simple.";
 const HERO_SUBTITLE =
   "Book trusted health packages and laboratory tests from the comfort of your home or at our partner locations.";
 
+// Set imperatively via ref, not the JSX `fetchPriority` prop: this React version (18) doesn't
+// have that prop in its known-DOM-attributes list (added in React 19) and logs a dev-only
+// console warning for it even though it still sets the DOM attribute correctly either way -
+// a callback ref sets the real HTMLImageElement property directly, with no warning, and re-runs
+// on every mount so it still applies when the hero/banner image swaps.
+function setFetchPriorityHigh(el: HTMLImageElement | null) {
+  if (el) el.fetchPriority = "high";
+}
+
 const AUTO_ADVANCE_MS = 9000;
+// Served from public/ at a fixed path (not a hashed src/assets import) and preloaded in
+// index.html - this is almost certainly the LCP element on the homepage, and a bundled/hashed
+// import wouldn't be discoverable by the browser's preload scanner until the JS bundle had
+// already downloaded, parsed, and mounted React (measured ~5s of pure "resource load delay" in
+// a Lighthouse run before this fix, dwarfing every other factor in the LCP timing).
+const HERO_IMAGE_SRC = "/hero-family.jpg";
 const SLIDE_HEIGHT = "h-[26rem] sm:h-[29rem] lg:h-[32rem]";
 
-export default function Hero({ banners, featuredPackage, onViewDetails }: HeroProps) {
+export default function Hero({ banners, featuredPackage, onViewDetails, loading = false }: HeroProps) {
   const addItem = useCartStore((s) => s.addItem);
   const inCart = useCartStore((s) =>
     featuredPackage ? s.items.some((i) => i.type === "package" && i.id === featuredPackage.id) : false
@@ -87,14 +102,20 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
                 </>
               ) : (
                 <>
+                  {/* The page's one true <h1> stays present (off-screen) even while a rotating
+                      promo slide is showing its own headline below - otherwise the page would
+                      have zero h1 elements for as long as that slide is active. The promo
+                      headline itself is a <p>, not a heading: it's transient marketing copy on
+                      a timer, not stable page-outline content, so it shouldn't compete as an h2. */}
+                  <h1 className="sr-only">{HERO_TITLE}</h1>
                   <span className="eyebrow inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-[10px] text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm">
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-400" />
                     Featured Offer
                   </span>
                   {banner.title && (
-                    <h2 className="mt-4 text-4xl text-white sm:text-hero">
+                    <p className="mt-4 text-4xl text-white sm:text-hero">
                       {banner.title}
-                    </h2>
+                    </p>
                   )}
                   {banner.subtitle && (
                     <p className="mt-3 max-w-lg text-base leading-7 text-primary-100">{banner.subtitle}</p>
@@ -135,10 +156,14 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
 
           <div key={`visual-${slide}`} className={`hero-slide-fade relative order-1 will-change-transform lg:order-2 ${SLIDE_HEIGHT}`}>
             {!banner ? (
-              featuredPackage && (
+              loading ? (
+                <div className="h-full w-full animate-pulse rounded-card bg-white/10 ring-1 ring-white/20" aria-hidden="true" />
+              ) : (
+                featuredPackage && (
                 <>
                   <img
-                    src={heroFamilyImage}
+                    ref={setFetchPriorityHigh}
+                    src={HERO_IMAGE_SRC}
                     alt="A family that booked a health checkup with ArogyaPlus"
                     className="h-full w-full rounded-card object-cover shadow-2xl shadow-black/20 ring-1 ring-white/20"
                   />
@@ -164,9 +189,13 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
                       <Star className="h-3 w-3 fill-current" aria-hidden="true" />
                       Most Popular Package
                     </span>
-                    <h3 className="mt-2 line-clamp-1 text-sm font-bold text-slate-900 sm:text-lg">{featuredPackage.name}</h3>
+                    {/* Not a heading: this floating preview card sits directly under the page's
+                        h1 with no h2 in between (it's part of the Hero, not its own section),
+                        so an h3 here would skip a level. Same reasoning as the banner headline
+                        above - it's a promotional teaser, not page-outline content. */}
+                    <p className="mt-2 line-clamp-1 text-sm font-bold text-slate-900 sm:text-lg">{featuredPackage.name}</p>
                     {featuredPackage.description && (
-                      <p className="mt-1 line-clamp-2 hidden text-xs text-slate-500 sm:block">{featuredPackage.description}</p>
+                      <p className="mt-1 hidden text-xs text-slate-500 sm:line-clamp-2">{featuredPackage.description}</p>
                     )}
 
                     <div className="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500 sm:mt-3 sm:text-xs">
@@ -174,13 +203,13 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
                       {featuredPackage.tests.length} {featuredPackage.tests.length === 1 ? "test" : "tests"} included
                     </div>
 
-                    <div className="mt-2.5 flex items-center justify-between rounded-full border border-slate-100 bg-slate-50 p-2 sm:mt-4 sm:p-3.5">
+                    <div className="mt-2.5 flex items-center justify-between gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-2 sm:mt-4 sm:p-3.5">
                       <div>
                         <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[10px]">Price</p>
-                        <p className="text-xs font-bold text-slate-900 sm:text-base">{formatCurrency(featuredPackage.lab_price)}</p>
+                        <p className="whitespace-nowrap text-xs font-bold text-slate-900 sm:text-base">{formatCurrency(featuredPackage.lab_price)}</p>
                       </div>
-                      <span className="flex items-center gap-1 pr-2 text-[10px] font-semibold text-primary-600 sm:text-[11px]">
-                        <Truck className="h-3 w-3" aria-hidden="true" />
+                      <span className="flex max-w-[6.5rem] items-center gap-1 text-right text-[10px] font-semibold leading-tight text-primary-600 sm:text-[11px]">
+                        <Truck className="h-3 w-3 shrink-0" aria-hidden="true" />
                         Home collection available
                       </span>
                     </div>
@@ -216,13 +245,15 @@ export default function Hero({ banners, featuredPackage, onViewDetails }: HeroPr
                     </div>
                   </div>
                 </>
+                )
               )
             ) : (
               <div className="relative h-full w-full overflow-hidden rounded-card ring-1 ring-white/20 shadow-2xl shadow-black/20">
                 <img
+                  ref={setFetchPriorityHigh}
                   key={banner.image_url}
                   src={banner.image_url}
-                  alt={banner.title ?? ""}
+                  alt={banner.title || "ArogyaPlus promotional offer"}
                   className="image-fade-in h-full w-full object-cover"
                 />
                 <div

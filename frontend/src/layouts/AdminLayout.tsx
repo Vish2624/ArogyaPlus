@@ -1,8 +1,10 @@
 import { Menu } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Outlet, useLocation } from "react-router-dom";
 
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import Spinner from "@/components/common/Spinner";
 import { getCurrentAdmin } from "@/services/authService";
 import { useAuthStore } from "@/store/authStore";
 
@@ -16,8 +18,9 @@ export default function AdminLayout() {
     if (!admin) {
       getCurrentAdmin().then(setAdmin).catch(() => {});
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // `admin` starts null and the `if` guard skips the fetch once it's set, so adding it here
+    // doesn't cause a refetch loop - it only lets the effect correctly react to that one transition.
+  }, [admin, setAdmin]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -25,6 +28,11 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
+      {/* Covers every nested admin route in one place rather than adding this to each admin
+          page individually - internal/private tooling has no business being indexed. */}
+      <Helmet>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <a
         href="#admin-main-content"
         className="sr-only z-[100] rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -46,7 +54,13 @@ export default function AdminLayout() {
           <span className="text-sm font-bold text-primary-800">ArogyaPlus Admin</span>
         </div>
         <main id="admin-main-content" className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-          <Outlet />
+          {/* Each admin page component is itself lazy-loaded (see AppRoutes.tsx) - this
+              Suspense is what actually catches that when navigating between admin pages
+              (dashboard -> packages, etc). The one wrapping <AdminLayout> in AppRoutes only
+              covers AdminLayout's own lazy load, not what it renders here via <Outlet>. */}
+          <Suspense fallback={<Spinner className="py-32" label="Loading..." />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

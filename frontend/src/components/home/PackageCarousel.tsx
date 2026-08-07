@@ -3,19 +3,22 @@ import { Link } from "react-router-dom";
 
 import LabArtworkBackdrop from "@/components/home/LabArtworkBackdrop";
 import PackageCarouselCard from "@/components/packages/PackageCarouselCard";
+import PackageCardSkeleton from "@/components/packages/PackageCardSkeleton";
 import type { Package } from "@/types/package";
+import { cardGridClass } from "@/utils/gridCols";
 
 interface PackageCarouselProps {
   packages: Package[];
   onViewDetails: (pkg: Package) => void;
+  loading?: boolean;
 }
 
 const TITLE = "Popular Health Packages";
 const DESCRIPTION =
   "Preventive care and early detection from certified labs - with home sample collection available and digital reports delivered in 48 hours.";
 
-export default function PackageCarousel({ packages, onViewDetails }: PackageCarouselProps) {
-  if (packages.length === 0) return null;
+export default function PackageCarousel({ packages, onViewDetails, loading = false }: PackageCarouselProps) {
+  if (!loading && packages.length === 0) return null;
 
   return (
     <section className="section relative overflow-hidden bg-white">
@@ -34,10 +37,10 @@ export default function PackageCarousel({ packages, onViewDetails }: PackageCaro
           </Link>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {packages.map((pkg) => (
-            <PackageCarouselCard key={pkg.id} pkg={pkg} onViewDetails={onViewDetails} />
-          ))}
+        <div className={`mt-10 grid gap-6 ${loading ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : cardGridClass(packages.length)}`}>
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => <PackageCardSkeleton key={i} />)
+            : packages.map((pkg) => <PackageCarouselCard key={pkg.id} pkg={pkg} onViewDetails={onViewDetails} />)}
         </div>
 
         <div className="mt-10 flex justify-center">

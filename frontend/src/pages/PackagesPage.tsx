@@ -1,10 +1,12 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 import EmptyState from "@/components/common/EmptyState";
 import ErrorState from "@/components/common/ErrorState";
 import Pagination from "@/components/common/Pagination";
+import Seo from "@/components/common/Seo";
 import LabArtworkBackdrop from "@/components/home/LabArtworkBackdrop";
 import PackageCard from "@/components/packages/PackageCard";
 import PackageCardSkeleton from "@/components/packages/PackageCardSkeleton";
@@ -13,6 +15,12 @@ import PackageSearchAutocomplete from "@/components/packages/PackageSearchAutoco
 import { getApiErrorMessage } from "@/services/api";
 import { listPackagesPaginated } from "@/services/packageService";
 import type { Package } from "@/types/package";
+import { breadcrumbSchema, itemListSchema } from "@/utils/structuredData";
+import { cardGridClass } from "@/utils/gridCols";
+
+const BREADCRUMB_ITEMS = [{ name: "Health Packages", path: "/packages" }];
+const SEO_DESCRIPTION =
+  "Browse the full ArogyaPlus health package catalogue in Dubai. Compare Lab Visit and Home Visit pricing, included tests, and book online in minutes.";
 
 const PAGE_SIZE = 9;
 
@@ -30,7 +38,9 @@ export default function PackagesPage() {
   const [sort, setSort] = useState<"price_asc" | "price_desc" | "">("");
   const [page, setPage] = useState(1);
 
-  const loadPackages = async () => {
+  // Memoized so its identity only changes when a value it actually captures changes - the
+  // debounce effect below depends on this function itself rather than repeating that list.
+  const loadPackages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -49,7 +59,7 @@ export default function PackagesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, category, sort, page]);
 
   useEffect(() => {
     const param = searchParams.get("search");
@@ -57,15 +67,13 @@ export default function PackagesPage() {
       setSearch(param);
       setPage(1);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
     const delay = search ? 300 : 0;
     const timeout = setTimeout(loadPackages, delay);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, sort, page]);
+  }, [search, loadPackages]);
 
   // Derived from whatever page is currently loaded — chips reflect categories present on this
   // page only, not the whole catalogue (no endpoint exists to list categories without loading
@@ -77,6 +85,16 @@ export default function PackagesPage() {
 
   return (
     <div className="section container-page">
+      <Seo
+        title="Full Packages Catalogue"
+        description={SEO_DESCRIPTION}
+        path="/packages"
+        jsonLd={[
+          breadcrumbSchema(BREADCRUMB_ITEMS),
+          ...(packages.length > 0 ? [itemListSchema(packages.map((p) => ({ name: p.name, price: p.lab_price })))] : []),
+        ]}
+      />
+      <Breadcrumbs items={BREADCRUMB_ITEMS} className="mb-4" />
       <div className="relative overflow-hidden rounded-card py-4 sm:py-6">
         <LabArtworkBackdrop compact />
         <div className="relative max-w-2xl">
@@ -148,6 +166,10 @@ export default function PackagesPage() {
       )}
 
       <div className="mt-8">
+        {/* Each PackageCard title is an h3 with nothing above it on this page but the h1 -
+            an sr-only h2 keeps the outline valid (h1 -> h2 -> h3) without changing the visual
+            design, which doesn't call for a second visible heading here. */}
+        <h2 className="sr-only">Packages</h2>
         {loading && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -166,7 +188,7 @@ export default function PackagesPage() {
               <span className="font-semibold text-slate-700">{totalRows}</span>{" "}
               {totalRows === 1 ? "package" : "packages"}
             </p>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={`grid gap-6 ${cardGridClass(packages.length)}`}>
               {packages.map((pkg) => (
                 <PackageCard key={pkg.id} pkg={pkg} onViewDetails={setSelectedPackage} />
               ))}

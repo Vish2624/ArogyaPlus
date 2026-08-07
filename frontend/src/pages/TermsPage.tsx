@@ -1,8 +1,18 @@
+import Breadcrumbs from "@/components/common/Breadcrumbs";
+import Seo from "@/components/common/Seo";
 import { CONTACT } from "@/utils/constants";
+
+const BREADCRUMB_ITEMS = [{ name: "Terms of Use", path: "/terms" }];
 
 export default function TermsPage() {
   return (
     <div className="section container-page max-w-3xl">
+      <Seo
+        title="Terms of Use"
+        description="The terms and conditions governing your use of ArogyaPlus's health package and lab test booking platform."
+        path="/terms"
+      />
+      <Breadcrumbs items={BREADCRUMB_ITEMS} className="mb-4" />
       <h1 className="text-3xl font-bold text-slate-900">Terms of Use</h1>
       <p className="mt-2 text-sm text-slate-500">Last updated: 26 July 2026</p>
 

@@ -6,10 +6,14 @@ import { useState } from "react";
 import BookingForm from "@/components/booking/BookingForm";
 import BookingSuccess from "@/components/booking/BookingSuccess";
 import CartList from "@/components/cart/CartList";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 import EmptyState from "@/components/common/EmptyState";
+import Seo from "@/components/common/Seo";
 import { useCartStore, useCartTotal } from "@/store/cartStore";
 import type { BookingConfirmation } from "@/types/booking";
 import { formatCurrency } from "@/utils/formatters";
+
+const BREADCRUMB_ITEMS = [{ name: "Booking", path: "/booking" }];
 
 export default function BookingPage() {
   const items = useCartStore((s) => s.items);
@@ -19,6 +23,7 @@ export default function BookingPage() {
   if (completedBooking) {
     return (
       <div className="container-page">
+        <Seo title="Booking Confirmed" description="Your ArogyaPlus booking confirmation." path="/booking" noindex />
         <BookingSuccess booking={completedBooking} />
       </div>
     );
@@ -26,6 +31,13 @@ export default function BookingPage() {
 
   return (
     <div className="section container-page">
+      <Seo
+        title="Complete Your Booking"
+        description="Review your selected health packages and lab tests, choose Home Visit or Lab Visit, and confirm your appointment with ArogyaPlus."
+        path="/booking"
+        noindex
+      />
+      <Breadcrumbs items={BREADCRUMB_ITEMS} className="mb-4" />
       <div className="max-w-2xl">
         <p className="eyebrow text-primary-600">Cart & Booking</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-900">Complete Your Booking</h1>

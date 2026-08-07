@@ -20,7 +20,7 @@ export default function Logo({ className = "h-12 w-auto" }: LogoProps) {
 
   return (
     <img
-      src="/logo.png"
+      src="/logo.svg"
       alt="ArogyaPlus"
       className={`${className} object-contain`}
       onError={() => setFailed(true)}

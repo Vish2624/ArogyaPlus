@@ -9,3 +9,29 @@
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
 </IfModule>
+
+# Security headers. Scoped to what this app actually loads, verified against the source:
+# - Fonts are self-hosted (@fontsource) - no fonts.googleapis.com/fonts.gstatic.com needed.
+# - The API origin (VITE_API_BASE_URL) is the same origin as the site itself - no separate
+#   API host needed in connect-src.
+# - img-src allows any https: host (not just 'self'): the admin package/test/banner forms
+#   have a plain "image_url" text field that explicitly accepts pasted external image URLs,
+#   not just this app's own /uploads - a same-origin-only img-src would silently break that.
+# - style-src needs 'unsafe-inline': React sets inline style="" attributes in a few places
+#   (e.g. the search-autocomplete dropdown's computed position) and there's no nonce/hash
+#   build pipeline here to avoid it. This is a known, common trade-off for CSP on apps using
+#   inline styles without a CSS-in-JS nonce setup.
+# - script-src intentionally does NOT need 'unsafe-inline': the JSON-LD blocks this app
+#   renders (type="application/ld+json") are inert data, not executable script, so CSP's
+#   script-src does not restrict them.
+#
+# IMPORTANT: verify this against a staging/preview deploy before relying on it in production -
+# it was written from a source-code audit, not a live run of the deployed site, and a wrong
+# CSP directive fails closed (breaks a real page) rather than failing open.
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+</IfModule>

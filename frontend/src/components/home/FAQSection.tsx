@@ -1,28 +1,9 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-const TITLE = "Frequently Asked Questions";
+import { FAQ_ITEMS } from "@/content/faqItems";
 
-const ITEMS = [
-  {
-    question: "How does home sample collection work?",
-    answer:
-      "Choose the Home Visit option at checkout, pick a convenient time slot, and a certified phlebotomist will collect your sample at your doorstep.",
-  },
-  {
-    question: "How long does it take to get my report?",
-    answer: "Most reports are delivered digitally within 24-48 hours of sample collection, depending on the tests booked.",
-  },
-  {
-    question: "Do I need to fast before my test?",
-    answer:
-      "Some tests (like fasting blood sugar or lipid profile) require 8-12 hours of fasting. Any preparation instructions are shown on the package or test details.",
-  },
-  {
-    question: "Can I reschedule or cancel my booking?",
-    answer: "Yes, you can reschedule or cancel from your booking confirmation email up to 12 hours before your slot.",
-  },
-];
+const TITLE = "Frequently Asked Questions";
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -36,7 +17,7 @@ export default function FAQSection() {
         </div>
 
         <div className="mt-10 space-y-3">
-          {ITEMS.map((item, index) => {
+          {FAQ_ITEMS.map((item, index) => {
             const isOpen = openIndex === index;
             return (
               <div key={`${item.question}-${index}`} className="card overflow-hidden">

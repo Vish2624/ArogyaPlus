@@ -2,14 +2,17 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import TestCard from "@/components/tests/TestCard";
+import TestCardSkeleton from "@/components/tests/TestCardSkeleton";
 import type { Test } from "@/types/test";
+import { cardGridClass } from "@/utils/gridCols";
 
 interface FeaturedTestsProps {
   tests: Test[];
+  loading?: boolean;
 }
 
-export default function FeaturedTests({ tests }: FeaturedTestsProps) {
-  if (tests.length === 0) return null;
+export default function FeaturedTests({ tests, loading = false }: FeaturedTestsProps) {
+  if (!loading && tests.length === 0) return null;
 
   return (
     <section className="section bg-slate-50">
@@ -25,10 +28,10 @@ export default function FeaturedTests({ tests }: FeaturedTestsProps) {
           </Link>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {tests.map((test) => (
-            <TestCard key={test.id} test={test} />
-          ))}
+        <div className={`mt-10 grid gap-5 ${loading ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : cardGridClass(tests.length)}`}>
+          {loading
+            ? Array.from({ length: 9 }).map((_, i) => <TestCardSkeleton key={i} />)
+            : tests.map((test) => <TestCard key={test.id} test={test} />)}
         </div>
 
         <div className="mt-10 flex justify-center">

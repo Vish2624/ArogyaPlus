@@ -1,5 +1,5 @@
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import ParameterFormModal from "@/components/admin/ParameterFormModal";
 import EmptyState from "@/components/common/EmptyState";
@@ -29,7 +29,9 @@ export default function AdminParametersPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingParameter, setEditingParameter] = useState<Parameter | null>(null);
 
-  const loadParameters = async () => {
+  // Memoized so its identity only changes when a value it actually captures changes - the
+  // debounce effect below depends on this function itself rather than repeating that list.
+  const loadParameters = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -46,14 +48,13 @@ export default function AdminParametersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, page]);
 
   useEffect(() => {
     const delay = search ? 300 : 0;
     const timeout = setTimeout(loadParameters, delay);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, page]);
+  }, [search, loadParameters]);
 
   const openAddModal = () => {
     setEditingParameter(null);

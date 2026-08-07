@@ -20,6 +20,16 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
+  // Every caller passes a fresh inline arrow for `onClose`, so putting it directly in the
+  // focus-trap effect's deps below would re-run that effect (re-stealing focus to the first
+  // element) on every parent re-render while open, not just on actual open/close transitions.
+  // Keeping a ref to the latest `onClose` lets the effect call the current callback without
+  // needing to depend on it.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -34,7 +44,7 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab") return;
@@ -59,7 +69,7 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
       document.body.style.overflow = "";
       previouslyFocused.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

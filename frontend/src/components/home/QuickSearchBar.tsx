@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 import SearchAutocomplete from "@/components/common/SearchAutocomplete";
 import type { AutocompleteSuggestion } from "@/components/common/SearchAutocomplete";
-import { listPackages } from "@/services/packageService";
-import { listTests } from "@/services/testService";
+import { listPackagesPaginated } from "@/services/packageService";
+import { listTestsPaginated } from "@/services/testService";
 
 interface QuickSearchBarProps {
   compact?: boolean;
@@ -25,14 +25,30 @@ export default function QuickSearchBar({ compact = false, closeSignal, onActiveC
   const [items, setItems] = useState<CombinedSuggestion[]>([]);
   const navigate = useNavigate();
 
+  // Compact mode (the sticky header search on every page) renders a bare input with no
+  // dropdown, so it never reads `items` - skip fetching entirely there. The full variant
+  // (hero only) searches server-side as the user types instead of preloading the whole
+  // catalogue, matching PackageSearchAutocomplete/TestSearchAutocomplete's pattern.
   useEffect(() => {
-    Promise.all([listPackages().catch(() => []), listTests().catch(() => [])]).then(([packages, tests]) => {
-      setItems([
-        ...packages.map((p) => ({ id: `pkg-${p.id}`, label: p.name, subtitle: "Package", kind: "package" as const })),
-        ...tests.map((t) => ({ id: `test-${t.id}`, label: t.name, subtitle: "Lab Test", kind: "test" as const })),
-      ]);
-    });
-  }, []);
+    if (compact) return;
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setItems([]);
+      return;
+    }
+    const timeout = setTimeout(() => {
+      Promise.all([
+        listPackagesPaginated({ search: trimmed, page: 1, page_size: 5 }).catch(() => ({ items: [] })),
+        listTestsPaginated({ search: trimmed, page: 1, page_size: 5 }).catch(() => ({ items: [] })),
+      ]).then(([packagesData, testsData]) => {
+        setItems([
+          ...packagesData.items.map((p) => ({ id: `pkg-${p.id}`, label: p.name, subtitle: "Package", kind: "package" as const })),
+          ...testsData.items.map((t) => ({ id: `test-${t.id}`, label: t.name, subtitle: "Lab Test", kind: "test" as const })),
+        ]);
+      });
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [compact, query]);
 
   const goTo = (path: "/packages" | "/tests") => {
     const trimmed = query.trim();
@@ -74,6 +90,7 @@ export default function QuickSearchBar({ compact = false, closeSignal, onActiveC
         value={query}
         onChange={setQuery}
         items={items}
+        filterLocally={false}
         onSelect={handleSelectSuggestion}
         placeholder="Search health packages, tests..."
         className="flex-1"

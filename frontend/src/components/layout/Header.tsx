@@ -32,6 +32,9 @@ export default function Header() {
           <div className="flex items-center gap-6">
             <a
               href={`tel:${CONTACT.phone.replace(/\s+/g, "")}`}
+              // Below `sm`, the visible text is hidden and the icon is aria-hidden, so without
+              // this the link has no accessible name at all on mobile viewports.
+              aria-label={CONTACT.phone}
               className="flex items-center gap-2 rounded text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
               <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />

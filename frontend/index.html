@@ -2,19 +2,36 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="ArogyaPlus - Book trusted health packages and laboratory tests, at home or at our partner labs in Dubai, UAE." />
+    <meta name="theme-color" content="#065f46" />
+    <!--
+      Preloads the homepage hero photo - almost certainly the LCP element on this SPA's
+      highest-traffic entry point. Has to live here (static HTML, not injected by React/Helmet)
+      to be seen by the browser's preload scanner before the JS bundle even starts downloading;
+      a Helmet-rendered <link> only exists once React has already mounted, which is exactly the
+      ~5s "resource load delay" this is fixing. Trade-off: since this file is shared by every
+      route, this fetch also fires on non-home pages that don't use the image - accepted given
+      the file is small (~139KB) and the homepage is the dominant entry point.
+    -->
+    <link rel="preload" as="image" href="/hero-family.jpg" fetchpriority="high" />
+    <!--
+      No static <meta name="description"> here on purpose: every route renders its own
+      unique description via <Seo> (see src/components/common/Seo.tsx). react-helmet-async
+      correctly replaces this single <title> element in place, but for <meta> tags it can
+      only dedupe against instances it manages itself - a static description tag here would
+      sit alongside (not get replaced by) each page's Helmet-rendered one, producing two
+      description meta tags at once. This <title> stays as a plain pre-hydration fallback
+      since it's inherently unique per the HTML spec, so there's no equivalent duplication risk.
+    -->
     <title>ArogyaPlus | Health Package & Lab Test Booking</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Fonts are self-hosted via @fontsource, imported in src/main.tsx - no external Google
+         Fonts request needed. See main.tsx for the LCP rationale. -->
   </head>
   <body>
     <div id="root"></div>

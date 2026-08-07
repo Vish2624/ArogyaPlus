@@ -1,9 +1,16 @@
 import { SearchX } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+
+import Seo from "@/components/common/Seo";
 
 export default function NotFoundPage() {
+  const { pathname } = useLocation();
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+      {/* This SPA can't return a real HTTP 404 (the Apache fallback serves index.html with a
+          200 for any unmatched path - a "soft 404"). noindex is the best mitigation available
+          without server-side route awareness; see the SEO report for the full caveat. */}
+      <Seo title="Page Not Found" description="The page you're looking for doesn't exist or may have been moved." path={pathname} noindex nofollow />
       <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-50 text-primary-600">
         <SearchX className="h-8 w-8" aria-hidden="true" />
       </span>

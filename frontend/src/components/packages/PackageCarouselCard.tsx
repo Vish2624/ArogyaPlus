@@ -32,7 +32,7 @@ export default function PackageCarouselCard({ pkg, onViewDetails }: PackageCarou
       <div className="mb-2.5 flex items-start justify-between sm:mb-3">
         {pkg.image_url ? (
           <span className="flex h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200 sm:h-10 sm:w-10">
-            <img src={pkg.image_url} alt="" className="h-full w-full object-cover" />
+            <img src={pkg.image_url} alt={pkg.name} loading="lazy" className="h-full w-full object-cover" />
           </span>
         ) : (
           <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${style.bg} ${style.text} sm:h-10 sm:w-10`}>

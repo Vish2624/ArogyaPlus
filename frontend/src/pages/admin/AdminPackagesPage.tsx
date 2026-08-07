@@ -1,5 +1,5 @@
 import { GripVertical, ListTree, Pencil, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import PackageFormModal from "@/components/admin/PackageFormModal";
@@ -38,11 +38,15 @@ export default function AdminPackagesPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
+    // `page` clamping down converges immediately (the resulting setPage call brings page back
+    // within bounds), so including it doesn't cause a loop - it lets the effect see the value
+    // it's actually comparing against instead of only reacting to totalPages changing.
     if (page > totalPages) setPage(Math.max(1, totalPages));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalPages]);
+  }, [page, totalPages]);
 
-  const loadPackages = async () => {
+  // Memoized so its identity only changes when a value it actually captures changes - the
+  // debounce effect below depends on this function itself rather than repeating that list.
+  const loadPackages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -59,14 +63,13 @@ export default function AdminPackagesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, page]);
 
   useEffect(() => {
     const delay = search ? 300 : 0;
     const timeout = setTimeout(loadPackages, delay);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, page]);
+  }, [search, loadPackages]);
 
   // One-time full-catalogue fetch feeding the "included tests" picker in the add/edit modal —
   // unrelated to the paginated table above, so it doesn't refetch when the page changes.

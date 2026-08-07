@@ -13,11 +13,14 @@ const LINK_CLASS =
   "inline-block rounded py-0.5 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500";
 
 function SectionHeading({ children }: { children: string }) {
+  // h3, not h4: the footer renders on every page, and whatever heading precedes it in the
+  // document (an h2 section title on most pages, sometimes h1 directly on a page with no h2
+  // sections of its own) is never more than one level above h3 - h4 here would skip a level.
   return (
-    <h4 className="inline-flex flex-col items-center sm:items-start">
+    <h3 className="inline-flex flex-col items-center sm:items-start">
       <span className="text-sm font-semibold text-slate-900">{children}</span>
       <span className="mt-1.5 h-0.5 w-8 rounded-full bg-primary-500" aria-hidden="true" />
-    </h4>
+    </h3>
   );
 }
 

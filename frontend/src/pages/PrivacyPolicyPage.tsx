@@ -1,8 +1,18 @@
+import Breadcrumbs from "@/components/common/Breadcrumbs";
+import Seo from "@/components/common/Seo";
 import { CONTACT } from "@/utils/constants";
+
+const BREADCRUMB_ITEMS = [{ name: "Privacy Policy", path: "/privacy-policy" }];
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="section container-page max-w-3xl">
+      <Seo
+        title="Privacy Policy"
+        description="How ArogyaPlus collects, uses, and protects your personal information when you book health packages and lab tests."
+        path="/privacy-policy"
+      />
+      <Breadcrumbs items={BREADCRUMB_ITEMS} className="mb-4" />
       <h1 className="text-3xl font-bold text-slate-900">Privacy Policy</h1>
       <p className="mt-2 text-sm text-slate-500">Last updated: 26 July 2026</p>
 

@@ -1,18 +1,9 @@
+import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 
+import Spinner from "@/components/common/Spinner";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
-import AdminLayout from "@/layouts/AdminLayout";
 import PublicLayout from "@/layouts/PublicLayout";
-import AdminBannersPage from "@/pages/admin/AdminBannersPage";
-import AdminBookingsPage from "@/pages/admin/AdminBookingsPage";
-import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
-import AdminLoginPage from "@/pages/admin/AdminLoginPage";
-import AdminPackageDetailPage from "@/pages/admin/AdminPackageDetailPage";
-import AdminPackagesPage from "@/pages/admin/AdminPackagesPage";
-import AdminParametersPage from "@/pages/admin/AdminParametersPage";
-import AdminProfilePage from "@/pages/admin/AdminProfilePage";
-import AdminTestDetailPage from "@/pages/admin/AdminTestDetailPage";
-import AdminTestsPage from "@/pages/admin/AdminTestsPage";
 import BookingPage from "@/pages/BookingPage";
 import HomePage from "@/pages/HomePage";
 import NotFoundPage from "@/pages/NotFoundPage";
@@ -20,6 +11,26 @@ import PackagesPage from "@/pages/PackagesPage";
 import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import TermsPage from "@/pages/TermsPage";
 import TestsPage from "@/pages/TestsPage";
+
+// The entire admin panel is only ever reached by logged-in staff, never by a public visitor -
+// lazy-loading it keeps its code out of the bundle every customer downloads just to browse
+// packages/tests. This was previously flagged as a pending follow-up to the earlier bundle-size
+// audit; doing it now as part of the broader performance/SEO pass.
+const AdminLayout = lazy(() => import("@/layouts/AdminLayout"));
+const AdminLoginPage = lazy(() => import("@/pages/admin/AdminLoginPage"));
+const AdminBannersPage = lazy(() => import("@/pages/admin/AdminBannersPage"));
+const AdminBookingsPage = lazy(() => import("@/pages/admin/AdminBookingsPage"));
+const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage"));
+const AdminPackageDetailPage = lazy(() => import("@/pages/admin/AdminPackageDetailPage"));
+const AdminPackagesPage = lazy(() => import("@/pages/admin/AdminPackagesPage"));
+const AdminParametersPage = lazy(() => import("@/pages/admin/AdminParametersPage"));
+const AdminProfilePage = lazy(() => import("@/pages/admin/AdminProfilePage"));
+const AdminTestDetailPage = lazy(() => import("@/pages/admin/AdminTestDetailPage"));
+const AdminTestsPage = lazy(() => import("@/pages/admin/AdminTestsPage"));
+
+function AdminFallback() {
+  return <Spinner className="flex min-h-screen items-center justify-center" label="Loading admin..." />;
+}
 
 export default function AppRoutes() {
   return (
@@ -33,13 +44,22 @@ export default function AppRoutes() {
         <Route path="/terms" element={<TermsPage />} />
       </Route>
 
-      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin/login"
+        element={
+          <Suspense fallback={<AdminFallback />}>
+            <AdminLoginPage />
+          </Suspense>
+        }
+      />
 
       <Route
         path="/admin"
         element={
           <ProtectedRoute>
-            <AdminLayout />
+            <Suspense fallback={<AdminFallback />}>
+              <AdminLayout />
+            </Suspense>
           </ProtectedRoute>
         }
       >

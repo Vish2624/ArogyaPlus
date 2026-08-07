@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import ErrorState from "@/components/common/ErrorState";
-import Spinner from "@/components/common/Spinner";
 import ArtworkBanner from "@/components/home/ArtworkBanner";
 import CertifiedLabs from "@/components/home/CertifiedLabs";
 import CTABanner from "@/components/home/CTABanner";
@@ -15,13 +13,22 @@ import Testimonials from "@/components/home/Testimonials";
 import TrustStrip from "@/components/home/TrustStrip";
 import PackageDetailModal from "@/components/packages/PackageDetailModal";
 import PromoCardCarousel from "@/components/home/PromoCardCarousel";
+import Seo from "@/components/common/Seo";
+import { FAQ_ITEMS } from "@/content/faqItems";
 import { listBanners } from "@/services/bannerService";
 import { getApiErrorMessage } from "@/services/api";
-import { listPackages } from "@/services/packageService";
-import { listTests } from "@/services/testService";
+import { listPackagesPaginated } from "@/services/packageService";
+import { listTestsPaginated } from "@/services/testService";
 import type { Banner } from "@/types/banner";
 import type { Package } from "@/types/package";
 import type { Test } from "@/types/test"; // still needed for tests state
+import { faqSchema } from "@/utils/structuredData";
+
+const SEO_DESCRIPTION =
+  "Book trusted health packages and individual lab tests in Dubai, UAE. Home sample collection or partner-lab visits, transparent pricing, and digital reports in 24-48 hours.";
+
+const HOME_PACKAGE_COUNT = 6;
+const HOME_TEST_COUNT = 9;
 
 export default function HomePage() {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -35,13 +42,15 @@ export default function HomePage() {
     setLoading(true);
     setError(null);
     try {
+      // Only ever need a handful of each for the homepage carousels — a small paginated
+      // request lands faster than fetching (and discarding most of) the full catalogue.
       const [packagesData, testsData, bannersData] = await Promise.all([
-        listPackages(),
-        listTests(),
+        listPackagesPaginated({ page: 1, page_size: HOME_PACKAGE_COUNT }),
+        listTestsPaginated({ page: 1, page_size: HOME_TEST_COUNT }),
         listBanners(),
       ]);
-      setPackages(packagesData);
-      setTests(testsData);
+      setPackages(packagesData.items);
+      setTests(testsData.items);
       setBanners([...bannersData].sort((a, b) => a.display_order - b.display_order));
     } catch (err) {
       setError(getApiErrorMessage(err, "We couldn't load the homepage content. Please try again."));
@@ -54,21 +63,42 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  if (loading) return <Spinner className="py-32" label="Loading ArogyaPlus..." />;
-  if (error) return <ErrorState message={error} onRetry={loadData} />;
+  const featuredPackage = loading
+    ? null
+    : packages.find((p) => p.is_featured) ??
+      [...packages].sort((a, b) => b.tests.length - a.tests.length)[0] ??
+      null;
 
-  const featuredPackage =
-    packages.find((p) => p.is_featured) ??
-    [...packages].sort((a, b) => b.tests.length - a.tests.length)[0] ??
-    null;
-
+  // Everything below only depends on data that loads fast or not at all (the static
+  // marketing sections) — none of it should sit behind a full-page spinner waiting on
+  // packages/tests/banners. Only Hero's visual and the two data carousels show their own
+  // loading state; the rest of the page renders immediately.
   return (
     <>
-      <Hero banners={banners} featuredPackage={featuredPackage} onViewDetails={setSelectedPackage} />
+      <Seo
+        title="Health Package & Lab Test Booking in Dubai"
+        description={SEO_DESCRIPTION}
+        path="/"
+        jsonLd={faqSchema(FAQ_ITEMS)}
+      />
+      <Hero banners={banners} featuredPackage={featuredPackage} onViewDetails={setSelectedPackage} loading={loading} />
       <StatsBanner />
       <TrustStrip />
-      <PackageCarousel packages={packages.slice(0, 6)} onViewDetails={setSelectedPackage} />
-      <FeaturedTests tests={tests.slice(0, 9)} />
+      {error ? (
+        <div className="container-page py-10">
+          <p className="rounded-card border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
+            {error}{" "}
+            <button type="button" onClick={loadData} className="font-semibold underline underline-offset-2">
+              Retry
+            </button>
+          </p>
+        </div>
+      ) : (
+        <>
+          <PackageCarousel packages={packages} onViewDetails={setSelectedPackage} loading={loading} />
+          <FeaturedTests tests={tests} loading={loading} />
+        </>
+      )}
       <ArtworkBanner />
       <HowItWorks />
       <Testimonials />

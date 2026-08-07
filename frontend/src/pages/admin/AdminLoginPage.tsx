@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Navigate, useNavigate } from "react-router-dom";
 
 import Logo from "@/components/common/Logo";
+import Seo from "@/components/common/Seo";
 import { getApiErrorMessage } from "@/services/api";
 import { getCurrentAdmin, login } from "@/services/authService";
 import { useAuthStore } from "@/store/authStore";
@@ -49,6 +50,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex min-h-screen">
+      <Seo title="Admin Login" description="ArogyaPlus admin dashboard sign-in." path="/admin/login" noindex nofollow />
       <div className="hero-gradient relative hidden w-[42%] flex-col justify-between overflow-hidden p-12 text-white lg:flex">
         <div
           className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl"

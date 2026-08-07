@@ -23,7 +23,17 @@ export default function CartDrawer() {
   const navigate = useNavigate();
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+
+  // The drawer stays mounted (translated off-screen) even when closed, for the slide
+  // transition - so aria-hidden alone isn't enough, its buttons/links stay in the tab order
+  // and a keyboard user can Tab into content that's hidden from assistive tech. `inert` (set
+  // imperatively - it's not yet in this React version's JSX attribute types) removes the
+  // whole subtree from both focus and the accessibility tree while closed.
+  useEffect(() => {
+    if (wrapperRef.current) wrapperRef.current.inert = !open;
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -87,7 +97,7 @@ export default function CartDrawer() {
   };
 
   return (
-    <div className={`fixed inset-0 z-[60] ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
+    <div ref={wrapperRef} className={`fixed inset-0 z-[60] ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
       <div
         className={`absolute inset-0 bg-slate-900/50 transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"}`}
         onClick={closeDrawer}

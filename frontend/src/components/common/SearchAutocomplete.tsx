@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 
@@ -79,12 +79,14 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
     setOpen(false);
   }, [closeSignal]);
 
-  const updateRect = () => {
+  // Stable via useCallback (only reads a ref and a setState, neither needs to be a dependency)
+  // so it can safely sit in the effect's dependency array without retriggering it every render.
+  const updateRect = useCallback(() => {
     const el = wrapperRef.current;
     if (!el) return;
     const box = el.getBoundingClientRect();
     setRect({ top: box.bottom + 6, left: box.left, width: box.width });
-  };
+  }, []);
 
   useLayoutEffect(() => {
     if (!showDropdown) return;
@@ -98,8 +100,7 @@ export default function SearchAutocomplete<T extends AutocompleteSuggestion>({
       window.removeEventListener("scroll", close, true);
       window.removeEventListener("resize", updateRect);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDropdown]);
+  }, [showDropdown, updateRect]);
 
   const selectSuggestion = (item: T) => {
     if (onSelect) onSelect(item);

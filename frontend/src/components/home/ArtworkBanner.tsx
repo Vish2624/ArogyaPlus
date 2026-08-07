@@ -1,9 +1,9 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import bannerAccurateResults from "@/assets/banner-accurate-results.png";
-import bannerBetterInsights from "@/assets/banner-better-insights.png";
-import bannerYourHealth from "@/assets/banner-your-health.png";
+import bannerTrustedDiagnostics from "@/assets/banner-trusted-diagnostics.jpg";
+import bannerAccurateResults from "@/assets/banner-accurate-results.jpg";
+import bannerBetterLife from "@/assets/banner-better-life.jpg";
 
 interface ArtworkSlide {
   id: number;
@@ -12,9 +12,9 @@ interface ArtworkSlide {
 }
 
 const SLIDES: ArtworkSlide[] = [
-  { id: 1, image: bannerAccurateResults, alt: "Accurate Results. Better Health." },
-  { id: 2, image: bannerBetterInsights, alt: "Better Insights. Healthier You." },
-  { id: 3, image: bannerYourHealth, alt: "Your Health. Our Priority." },
+  { id: 1, image: bannerTrustedDiagnostics, alt: "Trusted Diagnostics. Stronger Tomorrow." },
+  { id: 2, image: bannerAccurateResults, alt: "Accurate Results. Better Health." },
+  { id: 3, image: bannerBetterLife, alt: "Better Diagnostics. Better Life." },
 ];
 
 const AUTO_ADVANCE_MS = 5000;
@@ -40,6 +40,7 @@ export default function ArtworkBanner() {
             key={current.id}
             src={current.image}
             alt={current.alt}
+            loading="lazy"
             className="image-fade-in h-full w-full object-cover"
           />
         </div>
@@ -57,15 +58,21 @@ export default function ArtworkBanner() {
 
             <div className="flex gap-1.5">
               {SLIDES.map((s, i) => (
+                // The visual dot stays small; the button's own box (via p-2) is what gives it a
+                // real touch target instead of a 6x6px hit area.
                 <button
                   key={s.id}
                   type="button"
                   onClick={() => goTo(i)}
                   aria-label={`Go to banner ${i + 1}`}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === slide ? "w-5 bg-primary-600" : "w-1.5 bg-slate-300"
-                  }`}
-                />
+                  className="flex items-center justify-center p-2"
+                >
+                  <span
+                    className={`block h-1.5 rounded-full transition-all duration-300 ${
+                      i === slide ? "w-5 bg-primary-600" : "w-1.5 bg-slate-300"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
 

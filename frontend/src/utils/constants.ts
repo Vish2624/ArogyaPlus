@@ -1,5 +1,8 @@
 export const APP_NAME = "ArogyaPlus";
 
+/** Canonical production origin - used to build absolute canonical/OG URLs. No trailing slash. */
+export const SITE_URL = "https://arogyaplus.com";
+
 export const CONTACT = {
   phone: "+971 58 580 2248",
   whatsapp: "+971 58 580 2248",

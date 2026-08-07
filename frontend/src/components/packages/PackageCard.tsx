@@ -32,7 +32,7 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
       <div className="mb-2.5 flex items-center gap-2 sm:mb-3 sm:gap-2.5">
         {pkg.image_url ? (
           <span className="flex h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-slate-200 sm:h-9 sm:w-9">
-            <img src={pkg.image_url} alt="" className="h-full w-full object-cover" />
+            <img src={pkg.image_url} alt={pkg.name} loading="lazy" className="h-full w-full object-cover" />
           </span>
         ) : (
           <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.bg} ${style.text} sm:h-9 sm:w-9`}>
