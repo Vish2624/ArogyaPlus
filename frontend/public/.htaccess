@@ -1,14 +1,26 @@
 # React Router uses client-side (HTML5 history) routing, so a direct request or refresh on a
 # route like /admin has no matching file on the server. Fall back to index.html for anything
 # that isn't a real file/directory, and let the app's router take it from there.
+#
+# Only known route prefixes (kept in sync with src/routes/AppRoutes.tsx) get the 200+index.html
+# treatment. Anything else - old WordPress-era URLs from before this domain ran this app,
+# typos, scanner noise - falls through to a real Apache 404 instead of a "soft 404" (200 with
+# an SPA shell that only becomes noindex once React mounts and Helmet runs). Search engines
+# discount/deprioritize soft-404 URLs and can end up treating the whole domain as low-quality;
+# a genuine 404 status is the unambiguous signal. ErrorDocument below still serves the SPA
+# shell so NotFoundPage renders with the site's real header/footer instead of Apache's default
+# error page - only the HTTP status code differs from the old behavior.
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  RewriteRule ^$ /index.html [L]
+  RewriteRule ^(packages|tests|booking|privacy-policy|terms|admin)(/.*)?$ /index.html [L]
 </IfModule>
+
+ErrorDocument 404 /index.html
 
 # Security headers. Scoped to what this app actually loads, verified against the source:
 # - Fonts are self-hosted (@fontsource) - no fonts.googleapis.com/fonts.gstatic.com needed.
