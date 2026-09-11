@@ -1,28 +1,64 @@
-import { Download } from "lucide-react";
-import { useState } from "react";
+import { CalendarClock, Download } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import Modal from "@/components/common/Modal";
 import BookingStatusBadge from "@/components/admin/BookingStatusBadge";
-import type { Booking, BookingStatus } from "@/types/booking";
+import TimeSlotPicker from "@/components/booking/TimeSlotPicker";
+import { getApiErrorMessage } from "@/services/api";
+import type { AdminRescheduleBookingPayload } from "@/services/bookingService";
+import type { Booking, BookingStatus, TimeSlot } from "@/types/booking";
 import { getItemMeta, type ItemMetaLookup } from "@/utils/bookingItemMeta";
 import { downloadBookingPdf } from "@/utils/bookingPdf";
 import { withHomeCollectionFee } from "@/utils/bookingTotal";
 import { HOME_COLLECTION_FEE } from "@/utils/constants";
-import { formatCurrency, formatDate, formatDateTime } from "@/utils/formatters";
+import { formatCurrency, formatDate, formatDateTime, isTimeSlotPast, todayISODate } from "@/utils/formatters";
 
 interface BookingDetailModalProps {
   booking: Booking | null;
   onClose: () => void;
   onStatusChange: (id: number, status: BookingStatus) => void;
+  onReschedule: (id: number, payload: AdminRescheduleBookingPayload) => Promise<Booking>;
   itemMeta: ItemMetaLookup;
 }
 
 const STATUS_OPTIONS: BookingStatus[] = ["New", "Contacted", "Done"];
 
-export default function BookingDetailModal({ booking, onClose, onStatusChange, itemMeta }: BookingDetailModalProps) {
+export default function BookingDetailModal({ booking, onClose, onStatusChange, onReschedule, itemMeta }: BookingDetailModalProps) {
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [rescheduling, setRescheduling] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleSlot, setRescheduleSlot] = useState<TimeSlot | "">("");
+  const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false);
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
+
+  // Reset the inline reschedule form whenever the modal switches to a different booking (or
+  // closes) - otherwise a half-edited date/slot from one booking could leak into the next.
+  useEffect(() => {
+    setRescheduling(false);
+    setRescheduleError(null);
+    if (booking) {
+      setRescheduleDate(booking.preferred_date);
+      setRescheduleSlot(booking.time_slot as TimeSlot);
+    }
+  }, [booking]);
 
   if (!booking) return null;
+
+  const rescheduleUnchanged = rescheduleDate === booking.preferred_date && rescheduleSlot === booking.time_slot;
+
+  const handleRescheduleSave = async () => {
+    if (!rescheduleSlot || rescheduleUnchanged) return;
+    setRescheduleSubmitting(true);
+    setRescheduleError(null);
+    try {
+      await onReschedule(booking.id, { preferred_date: rescheduleDate, time_slot: rescheduleSlot });
+      setRescheduling(false);
+    } catch (err) {
+      setRescheduleError(getApiErrorMessage(err, "Could not reschedule this booking. Please try again."));
+    } finally {
+      setRescheduleSubmitting(false);
+    }
+  };
 
   const handleDownloadPdf = async () => {
     setGeneratingPdf(true);
@@ -59,9 +95,68 @@ export default function BookingDetailModal({ booking, onClose, onStatusChange, i
           <p className="text-xs text-slate-500">Visit Mode</p>
           <p className="font-medium capitalize text-slate-800">{booking.visit_mode} visit</p>
         </div>
-        <div>
-          <p className="text-xs text-slate-500">Preferred Date</p>
-          <p className="font-medium text-slate-800">{formatDate(booking.preferred_date)} at {booking.time_slot}</p>
+        <div className="col-span-2">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-slate-500">Preferred Date</p>
+            {!rescheduling && (
+              <button
+                type="button"
+                onClick={() => setRescheduling(true)}
+                className="flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700"
+              >
+                <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
+                Reschedule
+              </button>
+            )}
+          </div>
+          {!rescheduling ? (
+            <p className="font-medium text-slate-800">{formatDate(booking.preferred_date)} at {booking.time_slot}</p>
+          ) : (
+            <div className="mt-1.5 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <label htmlFor="reschedule-date" className="form-label !mb-1 !text-[11px]">New Date</label>
+              <input
+                id="reschedule-date"
+                type="date"
+                min={todayISODate()}
+                value={rescheduleDate}
+                onChange={(e) => setRescheduleDate(e.target.value)}
+                className="form-input !py-1.5 !text-sm"
+              />
+              <p className="form-label !mb-1 !mt-2.5 !text-[11px]">New Time Slot</p>
+              <TimeSlotPicker
+                value={rescheduleSlot || undefined}
+                onChange={setRescheduleSlot}
+                preferredDate={rescheduleDate}
+              />
+              {rescheduleSlot && isTimeSlotPast(rescheduleDate, rescheduleSlot) && (
+                <p className="form-error !mt-1.5">That slot has already passed — pick another.</p>
+              )}
+              {rescheduleError && <p className="form-error !mt-1.5">{rescheduleError}</p>}
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleRescheduleSave}
+                  disabled={rescheduleSubmitting || !rescheduleSlot || rescheduleUnchanged || isTimeSlotPast(rescheduleDate, rescheduleSlot)}
+                  className="btn-primary !px-3 !py-1.5 !text-xs disabled:opacity-40"
+                >
+                  {rescheduleSubmitting ? "Saving..." : "Save New Slot"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRescheduling(false);
+                    setRescheduleError(null);
+                    setRescheduleDate(booking.preferred_date);
+                    setRescheduleSlot(booking.time_slot as TimeSlot);
+                  }}
+                  disabled={rescheduleSubmitting}
+                  className="btn-secondary !px-3 !py-1.5 !text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <div>
           <p className="text-xs text-slate-500">Submitted</p>

@@ -1,6 +1,6 @@
 const STATS = [
-  { value: "50,000+", label: "Families Served" },
-  { value: "+12", label: "Years of Trust" },
+  { value: "1,000+", label: "Families Served" },
+  { value: "2+", label: "Years of Trust" },
   { value: "250+", label: "Tests Available" },
   { value: "98%", label: "Happy Patients" },
 ];

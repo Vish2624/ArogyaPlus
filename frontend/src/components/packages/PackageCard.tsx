@@ -6,6 +6,7 @@ import type { Package } from "@/types/package";
 import { iconForCategory } from "@/utils/categoryIcons";
 import { categoryStyle } from "@/utils/categoryColors";
 import { formatCurrencyParts } from "@/utils/formatters";
+import { packageReportTat } from "@/utils/tat";
 
 interface PackageCardProps {
   pkg: Package;
@@ -102,7 +103,7 @@ export default function PackageCard({ pkg, onViewDetails }: PackageCardProps) {
               category: pkg.category,
               labPrice: pkg.lab_price,
               homePrice: pkg.home_price,
-              tat: pkg.tat,
+              tat: packageReportTat(pkg),
               includedTestIds: pkg.tests.map((t) => t.id),
             });
             showToast(`${pkg.name} added to cart`);

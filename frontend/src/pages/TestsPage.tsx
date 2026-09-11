@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import Breadcrumbs from "@/components/common/Breadcrumbs";
@@ -16,6 +16,7 @@ import { listTestsPaginated } from "@/services/testService";
 import type { Test } from "@/types/test";
 import { breadcrumbSchema, itemListSchema } from "@/utils/structuredData";
 import { cardGridClass } from "@/utils/gridCols";
+import { TEST_CATEGORIES } from "@/utils/constants";
 
 const BREADCRUMB_ITEMS = [{ name: "Lab Tests", path: "/tests" }];
 const SEO_DESCRIPTION =
@@ -73,13 +74,10 @@ export default function TestsPage() {
     return () => clearTimeout(timeout);
   }, [search, loadTests]);
 
-  // Derived from whatever page is currently loaded — chips reflect categories present on this
-  // page only, not the whole catalogue (no endpoint exists to list categories without loading
-  // every test).
-  const categories = useMemo(
-    () => Array.from(new Set(tests.map((t) => t.category).filter((c): c is string => Boolean(c)))),
-    [tests]
-  );
+  // The fixed catalogue-wide category list, not derived from whatever page is currently
+  // loaded — deriving from `tests` only surfaced categories present on the current page
+  // (no endpoint exists to list categories without loading every test).
+  const categories = TEST_CATEGORIES;
 
   return (
     <div className="section container-page">
@@ -93,7 +91,7 @@ export default function TestsPage() {
         ]}
       />
       <Breadcrumbs items={BREADCRUMB_ITEMS} className="mb-4" />
-      <div className="relative overflow-hidden rounded-card py-4 sm:py-6">
+      <div className="relative overflow-hidden rounded-card px-6 py-4 sm:px-8 sm:py-6">
         <LabArtworkBackdrop compact />
         <div className="relative max-w-2xl">
           <p className="eyebrow text-primary-600">Lab Tests</p>

@@ -67,6 +67,22 @@ export async function adminUpdateBookingStatus(id: number, status: BookingStatus
   return normalizeBooking(data);
 }
 
+export interface AdminRescheduleBookingPayload {
+  preferred_date: string;
+  time_slot: string;
+}
+
+/**
+ * Changes only the date/time slot of an existing booking, for when a patient asks to move
+ * their appointment. NOTE: `PATCH /admin/bookings/{id}/reschedule` does not exist on the live
+ * backend yet (verified against its OpenAPI spec on 2026-09-12) — this call will 404 until the
+ * external backend adds it. See docs/API.md for the contract this expects.
+ */
+export async function adminRescheduleBooking(id: number, payload: AdminRescheduleBookingPayload): Promise<Booking> {
+  const { data } = await api.patch<Booking>(`/admin/bookings/${id}/reschedule`, payload);
+  return normalizeBooking(data);
+}
+
 export async function adminGetDashboardStats(): Promise<DashboardStats> {
   const { data } = await api.get<DashboardStats>("/admin/dashboard/stats");
   return { ...data, recent_bookings: data.recent_bookings.map(normalizeBooking) };

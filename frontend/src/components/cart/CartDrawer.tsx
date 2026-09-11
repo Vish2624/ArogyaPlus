@@ -4,8 +4,8 @@ import { FaWhatsapp } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import CartList from "@/components/cart/CartList";
-import { itemPrice, useCartStore, useCartTotal } from "@/store/cartStore";
-import { CONTACT } from "@/utils/constants";
+import { itemPrice, useCartStore, useCartSubtotal, useCartTotal } from "@/store/cartStore";
+import { CONTACT, MIN_ORDER_VALUE } from "@/utils/constants";
 import { formatCurrency } from "@/utils/formatters";
 
 const FOCUSABLE_SELECTOR =
@@ -17,6 +17,8 @@ export default function CartDrawer() {
   const items = useCartStore((s) => s.items);
   const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);
   const total = useCartTotal();
+  const subtotal = useCartSubtotal();
+  const belowMinOrder = subtotal < MIN_ORDER_VALUE;
   const totalAmount = Number.isFinite(total)
     ? total.toLocaleString("en-AE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : "0.00";
@@ -82,11 +84,9 @@ export default function CartDrawer() {
       lines.push(`- Home Collection Fee — AED 75.00`);
     }
     const message = [
-      "Hi ArogyaPlus! I'd like a quotation for:",
+      "Hi ArogyaPlus! I would like to get more details for the following:",
       "",
       ...lines,
-      "",
-      `Total: ${formatCurrency(total)}`,
     ].join("\n");
     return `${CONTACT.whatsappLink}?text=${encodeURIComponent(message)}`;
   };
@@ -154,7 +154,18 @@ export default function CartDrawer() {
                 <span className="text-3xl font-extrabold text-primary-700">{totalAmount}</span>
               </span>
             </div>
-            <button type="button" onClick={handleProceed} className="btn-primary w-full">
+            {belowMinOrder && (
+              <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
+                Add {formatCurrency(MIN_ORDER_VALUE - subtotal)} more to reach the {formatCurrency(MIN_ORDER_VALUE)}{" "}
+                minimum order value.
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={handleProceed}
+              disabled={belowMinOrder}
+              className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
+            >
               Proceed to Booking
             </button>
             <a

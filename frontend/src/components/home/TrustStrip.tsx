@@ -1,16 +1,15 @@
-import { Award, Home, Lock, ShieldCheck, Timer } from "lucide-react";
+import { Award, Home, ShieldCheck, Timer } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const BADGES = [
-  { title: "NABH Accredited Labs", subtitle: "Government certified" },
-  { title: "HIPAA Compliant", subtitle: "Your data is safe" },
+  { title: "DHA & MOH Approved", subtitle: "Professionals" },
   { title: "Home Collection Available", subtitle: "At your doorstep" },
   { title: "Digital Reports in 48h", subtitle: "With doctor review" },
 ];
 
 const ICON_RULES: [RegExp, LucideIcon][] = [
-  [/certif|accredit|nabh|award/i, Award],
-  [/hipaa|secure|privacy|safe|encrypt/i, Lock],
+  [/certif|accredit|award/i, Award],
+  [/approved|dha|moh|license/i, ShieldCheck],
   [/home|doorstep|collection/i, Home],
   [/fast|quick|48|24|hour|hrs|report|digital/i, Timer],
 ];

@@ -314,6 +314,7 @@ There is no public/customer-facing parameters endpoint — these are only ever v
 | GET | `/admin/bookings` | Yes | Paginated. Query: `search` (name/phone/email/reference), `status_filter` (`New`\|`Contacted`\|`Done`), `booking_date` (YYYY-MM-DD), `page`, `page_size`. |
 | GET | `/admin/bookings/{id}` | Yes | |
 | PATCH | `/admin/bookings/{id}/status` | Yes | Body `{ "status": "Contacted" }`. |
+| PATCH | `/admin/bookings/{id}/reschedule` | Yes | **Not yet implemented on the backend** (frontend calls it, gets `404`). Body `{ "preferred_date": "2026-09-20", "time_slot": "09:00 AM" }` — same validation as `POST /bookings` (`preferred_date` can't be in the past, `time_slot` must match the list exactly). Changes only those two fields; everything else on the booking is untouched. Returns the full updated `Booking` object, same shape as `GET /admin/bookings/{id}`. |
 | GET | `/admin/dashboard/stats` | Yes | Counts + `recent_bookings` (last 5, full `Booking` shape). |
 
 **POST /bookings body:**

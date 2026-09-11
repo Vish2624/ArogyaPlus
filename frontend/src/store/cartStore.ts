@@ -98,6 +98,12 @@ export const useCartStore = create<CartState>()(
   )
 );
 
+/** Sum of item prices only — excludes the home collection fee. Used for the min-order check. */
+export function useCartSubtotal(): number {
+  const items = useCartStore((s) => s.items);
+  return items.reduce((sum, item) => sum + itemPrice(item), 0);
+}
+
 export function useCartTotal(): number {
   const items = useCartStore((s) => s.items);
   const homeCollectionAdded = useCartStore((s) => s.homeCollectionAdded);

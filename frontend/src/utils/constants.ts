@@ -31,5 +31,8 @@ export const MAX_AGE = 99;
 
 export const HOME_COLLECTION_FEE = 75;
 
+/** Minimum cart subtotal required to book — applies to packages and tests alike. */
+export const MIN_ORDER_VALUE = 299;
+
 export const PACKAGE_CATEGORIES = ["Essential", "Comprehensive", "Blood", "Specialized"] as const;
 export const TEST_CATEGORIES = ["Blood", "Specialized", "Comprehensive", "Essential", "Diabetes", "Cardiac", "Kidney", "Liver", "Thyroid", "Vitamin"] as const;

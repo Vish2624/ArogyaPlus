@@ -1,4 +1,4 @@
-import { Building2, ChevronLeft, ChevronRight, TrendingUp, Users } from "lucide-react";
+import { Building2, TrendingUp, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import promoPartnerImage from "@/assets/promo-partner-clinic.jpg";
 import promoCorporateImage from "@/assets/promo-corporate-team.jpg";
 import promoHomeVisitImage from "@/assets/promo-homevisit-bloodtest.jpg";
+import CarouselNav from "@/components/common/CarouselNav";
 import { CONTACT } from "@/utils/constants";
 
 interface PromoCard {
@@ -69,13 +70,14 @@ function splitTitle(title: string): [string, string] {
 
 export default function PromoCardCarousel() {
   const [slide, setSlide] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
   const count = CARDS.length;
 
   useEffect(() => {
-    if (count < 2) return;
+    if (count < 2 || !isPlaying) return;
     const timer = setInterval(() => setSlide((s) => (s + 1) % count), AUTO_ADVANCE_MS);
     return () => clearInterval(timer);
-  }, [count]);
+  }, [count, isPlaying]);
 
   const goTo = (next: number) => setSlide((next + count) % count);
   const card = CARDS[slide];
@@ -113,52 +115,15 @@ export default function PromoCardCarousel() {
             </div>
           </div>
 
-          {count > 1 && (
-            <div className="mt-6 flex items-center justify-center gap-5">
-              <button
-                type="button"
-                onClick={() => goTo(slide - 1)}
-                aria-label="Previous card"
-                className="rounded-full border border-slate-200 bg-white p-2.5 text-slate-500 shadow-elevated transition-colors hover:bg-primary-50 hover:text-primary-700"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  {CARDS.map((c, i) => (
-                    // The visual dot stays small; the button's own box (via p-2) is what gives
-                    // it a real touch target instead of a 6x6px hit area.
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => goTo(i)}
-                      aria-label={`Go to card ${i + 1}`}
-                      className="flex items-center justify-center p-2"
-                    >
-                      <span
-                        className={`block h-1.5 rounded-full transition-all duration-300 ${
-                          i === slide ? "w-5 bg-primary-600" : "w-1.5 bg-slate-300"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-bold text-white">
-                  {slide + 1}/{count}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => goTo(slide + 1)}
-                aria-label="Next card"
-                className="rounded-full border border-slate-200 bg-white p-2.5 text-slate-500 shadow-elevated transition-colors hover:bg-primary-50 hover:text-primary-700"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          )}
+          <CarouselNav
+            slide={slide}
+            count={count}
+            goTo={goTo}
+            isPlaying={isPlaying}
+            onTogglePlay={() => setIsPlaying((p) => !p)}
+            variant="onLight"
+            label="card"
+          />
         </div>
       </div>
     </section>

@@ -9,8 +9,9 @@ import CartList from "@/components/cart/CartList";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import EmptyState from "@/components/common/EmptyState";
 import Seo from "@/components/common/Seo";
-import { useCartStore, useCartTotal } from "@/store/cartStore";
+import { useCartStore, useCartSubtotal, useCartTotal } from "@/store/cartStore";
 import type { BookingConfirmation } from "@/types/booking";
+import { MIN_ORDER_VALUE } from "@/utils/constants";
 import { formatCurrency } from "@/utils/formatters";
 
 const BREADCRUMB_ITEMS = [{ name: "Booking", path: "/booking" }];
@@ -18,6 +19,8 @@ const BREADCRUMB_ITEMS = [{ name: "Booking", path: "/booking" }];
 export default function BookingPage() {
   const items = useCartStore((s) => s.items);
   const total = useCartTotal();
+  const subtotal = useCartSubtotal();
+  const belowMinOrder = subtotal < MIN_ORDER_VALUE;
   const [completedBooking, setCompletedBooking] = useState<BookingConfirmation | null>(null);
 
   if (completedBooking) {
@@ -89,7 +92,21 @@ export default function BookingPage() {
               </span>
               <h2 className="text-base font-semibold text-slate-900">Your Details</h2>
             </div>
-            <BookingForm onSuccess={setCompletedBooking} />
+            {belowMinOrder ? (
+              <div className="rounded-lg bg-amber-50 p-5 text-sm text-amber-800">
+                <p className="font-semibold">Minimum order value is {formatCurrency(MIN_ORDER_VALUE)}.</p>
+                <p className="mt-1">
+                  Add {formatCurrency(MIN_ORDER_VALUE - subtotal)} more in packages or tests to proceed with your
+                  booking.
+                </p>
+                <div className="mt-4 flex gap-3">
+                  <Link to="/packages" className="btn-secondary !text-xs">View Packages</Link>
+                  <Link to="/tests" className="btn-primary !text-xs">View Tests</Link>
+                </div>
+              </div>
+            ) : (
+              <BookingForm onSuccess={setCompletedBooking} />
+            )}
           </div>
         </div>
       )}

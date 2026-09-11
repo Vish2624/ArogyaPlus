@@ -7,6 +7,7 @@ import { categoryStyle } from "@/utils/categoryColors";
 import { iconForCategory } from "@/utils/categoryIcons";
 import { percentOff } from "@/utils/discount";
 import { formatCurrencyParts } from "@/utils/formatters";
+import { testReportTat } from "@/utils/tat";
 
 interface TestCardProps {
   test: Test;
@@ -22,6 +23,7 @@ export default function TestCard({ test }: TestCardProps) {
   const labPrice = formatCurrencyParts(test.lab_price);
   const originalLabPrice = test.original_lab_price ? formatCurrencyParts(test.original_lab_price) : null;
   const off = percentOff(test.lab_price, test.original_lab_price);
+  const reportTat = testReportTat(test.tat);
 
   return (
     <div className="card flex flex-col p-4 hover:-translate-y-0.5 hover:shadow-hover hover:ring-primary-500/40 sm:p-5">
@@ -38,10 +40,10 @@ export default function TestCard({ test }: TestCardProps) {
         {test.category && <span className={`badge w-fit ${style.bg} ${style.text}`}>{test.category}</span>}
       </div>
       <h3 className="text-sm font-semibold text-slate-900 sm:text-base">{test.name}</h3>
-      {test.tat && (
+      {reportTat && (
         <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary-700">
           <Clock className="h-3.5 w-3.5 text-primary-600" aria-hidden="true" />
-          Report in {test.tat}
+          Report in {reportTat}
         </p>
       )}
       {test.fasting_required === true && (
@@ -103,7 +105,7 @@ export default function TestCard({ test }: TestCardProps) {
               category: test.category,
               labPrice: test.lab_price,
               homePrice: test.home_price,
-              tat: test.tat,
+              tat: reportTat,
             });
             showToast(`${test.name} added to cart`);
           }}

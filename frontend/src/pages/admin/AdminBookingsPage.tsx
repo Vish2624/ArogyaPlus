@@ -8,7 +8,13 @@ import ErrorState from "@/components/common/ErrorState";
 import Pagination from "@/components/common/Pagination";
 import Spinner from "@/components/common/Spinner";
 import { getApiErrorMessage } from "@/services/api";
-import { adminListAllBookings, adminListBookings, adminUpdateBookingStatus } from "@/services/bookingService";
+import {
+  adminListAllBookings,
+  adminListBookings,
+  adminRescheduleBooking,
+  adminUpdateBookingStatus,
+  type AdminRescheduleBookingPayload,
+} from "@/services/bookingService";
 import { adminListPackages } from "@/services/packageService";
 import { adminListTests } from "@/services/testService";
 import type { Booking, BookingStatus } from "@/types/booking";
@@ -81,6 +87,16 @@ export default function AdminBookingsPage() {
     } catch (err) {
       window.alert(getApiErrorMessage(err, "Could not update booking status."));
     }
+  };
+
+  // Unlike handleStatusChange, errors are intentionally left to propagate — BookingDetailModal
+  // awaits this itself to keep its inline reschedule form open (with the error shown) on
+  // failure instead of the fire-and-forget-plus-alert pattern used for status changes.
+  const handleReschedule = async (id: number, payload: AdminRescheduleBookingPayload) => {
+    const updated = await adminRescheduleBooking(id, payload);
+    setBookings((prev) => prev.map((b) => (b.id === id ? updated : b)));
+    setSelectedBooking((prev) => (prev && prev.id === id ? updated : prev));
+    return updated;
   };
 
   const handleExportCsv = async () => {
@@ -243,6 +259,7 @@ export default function AdminBookingsPage() {
         booking={selectedBooking}
         onClose={() => setSelectedBooking(null)}
         onStatusChange={handleStatusChange}
+        onReschedule={handleReschedule}
         itemMeta={itemMeta}
       />
     </div>

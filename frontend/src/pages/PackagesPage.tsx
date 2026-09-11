@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import Breadcrumbs from "@/components/common/Breadcrumbs";
@@ -17,6 +17,7 @@ import { listPackagesPaginated } from "@/services/packageService";
 import type { Package } from "@/types/package";
 import { breadcrumbSchema, itemListSchema } from "@/utils/structuredData";
 import { cardGridClass } from "@/utils/gridCols";
+import { PACKAGE_CATEGORIES } from "@/utils/constants";
 
 const BREADCRUMB_ITEMS = [{ name: "Health Packages", path: "/packages" }];
 const SEO_DESCRIPTION =
@@ -75,13 +76,10 @@ export default function PackagesPage() {
     return () => clearTimeout(timeout);
   }, [search, loadPackages]);
 
-  // Derived from whatever page is currently loaded — chips reflect categories present on this
-  // page only, not the whole catalogue (no endpoint exists to list categories without loading
-  // every package).
-  const categories = useMemo(
-    () => Array.from(new Set(packages.map((p) => p.category).filter((c): c is string => Boolean(c)))),
-    [packages]
-  );
+  // The fixed catalogue-wide category list, not derived from whatever page is currently
+  // loaded — deriving from `packages` only surfaced categories present on the current page
+  // (no endpoint exists to list categories without loading every package).
+  const categories = PACKAGE_CATEGORIES;
 
   return (
     <div className="section container-page">
@@ -95,7 +93,7 @@ export default function PackagesPage() {
         ]}
       />
       <Breadcrumbs items={BREADCRUMB_ITEMS} className="mb-4" />
-      <div className="relative overflow-hidden rounded-card py-4 sm:py-6">
+      <div className="relative overflow-hidden rounded-card px-6 py-4 sm:px-8 sm:py-6">
         <LabArtworkBackdrop compact />
         <div className="relative max-w-2xl">
           <p className="eyebrow text-primary-600">Health Packages</p>

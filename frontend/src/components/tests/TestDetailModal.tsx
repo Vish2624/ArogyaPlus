@@ -5,6 +5,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useToastStore } from "@/store/toastStore";
 import type { Test } from "@/types/test";
 import { formatCurrency } from "@/utils/formatters";
+import { testReportTat } from "@/utils/tat";
 
 interface TestDetailModalProps {
   test: Test | null;
@@ -18,6 +19,8 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
   const showToast = useToastStore((s) => s.showToast);
 
   if (!test) return null;
+
+  const reportTat = testReportTat(test.tat);
 
   return (
     <Modal
@@ -38,7 +41,7 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
                 category: test.category,
                 labPrice: test.lab_price,
                 homePrice: test.home_price,
-                tat: test.tat,
+                tat: reportTat,
               });
               showToast(`${test.name} added to cart`);
               onClose();
@@ -62,10 +65,10 @@ export default function TestDetailModal({ test, onClose }: TestDetailModalProps)
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-        {test.tat && (
+        {reportTat && (
           <span className="badge gap-1.5 border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700">
             <Clock className="h-4 w-4 text-primary-600" aria-hidden="true" />
-            Report in {test.tat}
+            Report in {reportTat}
           </span>
         )}
         {test.sample_type && (

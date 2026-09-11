@@ -6,6 +6,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useToastStore } from "@/store/toastStore";
 import type { Package } from "@/types/package";
 import { formatCurrency } from "@/utils/formatters";
+import { packageReportTat } from "@/utils/tat";
 
 interface PackageDetailModalProps {
   pkg: Package | null;
@@ -21,6 +22,7 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
   if (!pkg) return null;
 
   const totalParameters = new Set(pkg.tests.flatMap((test) => test.parameters.map((p) => p.id))).size;
+  const reportTat = packageReportTat(pkg);
 
   return (
     <Modal
@@ -40,7 +42,7 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
               category: pkg.category,
               labPrice: pkg.lab_price,
               homePrice: pkg.home_price,
-              tat: pkg.tat,
+              tat: reportTat,
               includedTestIds: pkg.tests.map((t) => t.id),
             });
             showToast(`${pkg.name} added to cart`);
@@ -59,10 +61,10 @@ export default function PackageDetailModal({ pkg, onClose }: PackageDetailModalP
       )}
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {pkg.tat && (
+        {reportTat && (
           <span className="badge gap-1.5 border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700">
             <Clock className="h-4 w-4 text-primary-600" aria-hidden="true" />
-            Report in {pkg.tat}
+            Report in {reportTat}
           </span>
         )}
         {pkg.fasting_required === true && (

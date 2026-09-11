@@ -1,8 +1,9 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, Eye, Star, Truck } from "lucide-react";
+import { CheckCircle2, Eye, Star, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import QuickSearchBar from "./QuickSearchBar";
+import CarouselNav from "@/components/common/CarouselNav";
 import { useCartStore } from "@/store/cartStore";
 import { useToastStore } from "@/store/toastStore";
 import type { Banner } from "@/types/banner";
@@ -16,7 +17,7 @@ interface HeroProps {
   loading?: boolean;
 }
 
-const HERO_EYEBROW = "Trusted by 50,000+ Families";
+const HERO_EYEBROW = "Trusted by 1,000+ Families";
 const HERO_TITLE = "Comprehensive Healthcare, Made Simple.";
 const HERO_SUBTITLE =
   "Book trusted health packages and laboratory tests from the comfort of your home or at our partner locations.";
@@ -49,12 +50,13 @@ export default function Hero({ banners, featuredPackage, onViewDetails, loading 
   const slideCount = 1 + banners.length;
   const [slide, setSlide] = useState(0);
   const [searchActive, setSearchActive] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
-    if (slideCount < 2 || searchActive) return;
+    if (slideCount < 2 || searchActive || !isPlaying) return;
     const timer = setInterval(() => setSlide((s) => (s + 1) % slideCount), AUTO_ADVANCE_MS);
     return () => clearInterval(timer);
-  }, [slideCount, searchActive]);
+  }, [slideCount, searchActive, isPlaying]);
 
   // Scrolling away counts as leaving the search bar even if it's still technically focused
   // (e.g. mobile keyboard still open) - resume auto-advance once that happens.
@@ -172,16 +174,10 @@ export default function Hero({ banners, featuredPackage, onViewDetails, loading 
                     aria-hidden="true"
                   />
 
-                  <div className="animate-float absolute -top-3 -right-2 flex items-center gap-2 rounded-xl bg-white p-2.5 text-slate-800 shadow-2xl shadow-black/20 ring-1 ring-black/5 sm:-right-3 sm:p-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-600">
-                      <Star className="h-4 w-4 fill-current" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <p className="text-sm font-extrabold leading-none text-slate-900">
-                        4.9<span className="text-[10px] font-semibold text-slate-500">/5</span>
-                      </p>
-                      <p className="mt-1 whitespace-nowrap text-[10px] font-medium text-slate-500">2,000+ reviews</p>
-                    </div>
+                  <div className="animate-float absolute -top-3 -right-2 flex items-center gap-1 rounded-xl bg-white px-3 py-2.5 text-gold-500 shadow-2xl shadow-black/20 ring-1 ring-black/5 sm:-right-3 sm:px-3.5 sm:py-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-current" aria-hidden="true" />
+                    ))}
                   </div>
 
                   <div className="absolute -bottom-4 left-3 w-[62%] max-w-[15rem] flex flex-col overflow-hidden rounded-2xl bg-white p-3.5 text-slate-800 shadow-2xl shadow-black/20 ring-1 ring-black/5 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-black/30 sm:-bottom-6 sm:left-4 sm:w-[52%] sm:max-w-[18rem] sm:rounded-card sm:p-5 lg:-left-6 lg:max-w-[21rem]">
@@ -273,41 +269,16 @@ export default function Hero({ banners, featuredPackage, onViewDetails, loading 
           </div>
         </div>
 
-        {slideCount > 1 && (
-          <div className="mt-10 flex items-center justify-center gap-4 sm:mt-12">
-            <button
-              type="button"
-              onClick={() => goTo(slide - 1)}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white backdrop-blur-md transition-colors hover:bg-white/25"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <div className="flex items-center">
-              {Array.from({ length: slideCount }).map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-label={`Go to slide ${i + 1}`}
-                  className="flex items-center justify-center p-2"
-                >
-                  <span
-                    className={`block h-1.5 rounded-full transition-all duration-300 ${i === slide ? "w-5 bg-white" : "w-1.5 bg-white/50"}`}
-                  />
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => goTo(slide + 1)}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/15 text-white backdrop-blur-md transition-colors hover:bg-white/25"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-        )}
+        <CarouselNav
+          slide={slide}
+          count={slideCount}
+          goTo={goTo}
+          isPlaying={isPlaying}
+          onTogglePlay={() => setIsPlaying((p) => !p)}
+          variant="onDark"
+          label="slide"
+          className="mt-10 flex items-center justify-center gap-3 sm:mt-12 sm:gap-4"
+        />
       </div>
     </section>
   );
