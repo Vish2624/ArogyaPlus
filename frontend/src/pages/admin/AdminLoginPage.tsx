@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
 
         <div className="relative flex items-center gap-2.5 text-lg font-bold">
           <span className="rounded-lg bg-white/95 p-1.5 shadow-sm">
-            <Logo className="h-8 w-auto" />
+            <Logo className="h-14 w-auto" />
           </span>
           <span>Admin</span>
         </div>
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
       <div className="flex flex-1 items-center justify-center bg-white px-4 py-16">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2 text-lg font-bold text-primary-800 lg:hidden">
-            <Logo className="h-10 w-auto" />
+            <Logo className="h-16 w-auto" />
             <span>Admin</span>
           </div>
 

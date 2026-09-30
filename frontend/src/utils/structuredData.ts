@@ -18,7 +18,7 @@ export function organizationSchema() {
     email: CONTACT.email,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "First Floor, M-4, Gold Building, Near Bus Stand, Al Karama",
+      streetAddress: CONTACT.streetAddress,
       addressLocality: "Dubai",
       addressCountry: "AE",
     },

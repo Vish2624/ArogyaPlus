@@ -34,7 +34,7 @@ export default function Footer() {
 
       <div className="container-page relative grid gap-8 py-12 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-4">
         <div className="text-center sm:text-left">
-          <Logo className="mx-auto h-12 w-auto sm:mx-0 sm:h-14" />
+          <Logo className="mx-auto h-20 w-auto sm:mx-0 sm:h-24" />
           <p className="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-slate-500 sm:mx-0">{FOOTER_TEXT}</p>
         </div>
 
@@ -45,7 +45,16 @@ export default function Footer() {
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">
                 <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
-              <span className="pt-1 text-left">{CONTACT.address}</span>
+              <address className="pt-1 text-left not-italic leading-relaxed">
+                {CONTACT.companies.map((name) => (
+                  <span key={name} className="block font-medium text-slate-700">{name}</span>
+                ))}
+                <span className="mt-1.5 block">
+                  {CONTACT.addressLines.map((line) => (
+                    <span key={line} className="block">{line}</span>
+                  ))}
+                </span>
+              </address>
             </li>
             <li className="flex items-center justify-center gap-2.5 sm:justify-start">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">

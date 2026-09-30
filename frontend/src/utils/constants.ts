@@ -4,11 +4,24 @@ export const APP_NAME = "ArogyaPlus";
 export const SITE_URL = "https://arogyaplus.com";
 
 export const CONTACT = {
-  phone: "+971 58 580 2248",
-  whatsapp: "+971 58 580 2248",
-  whatsappLink: "https://wa.me/971585802248",
+  phone: "+971 50 886 0612",
+  whatsapp: "+971 50 886 0612",
+  whatsappLink: "https://wa.me/971508860612",
   email: "support@arogyaplus.com",
-  address: "First Floor, M-4, Gold Building, Near Bus Stand, Al Karama, Dubai, United Arab Emirates",
+  company: "Wallet Edge Global FZC LLC & Wallet Edge Technologies LLC",
+  companies: ["Wallet Edge Global FZC LLC", "Wallet Edge Technologies LLC"],
+  // Display-friendly breakdown of `address` for the footer.
+  addressLines: [
+    "Office 307, 3rd Floor",
+    "Al Hamsa Building (Office Tower)",
+    "Breeze Business Center, Office #13",
+    "Next to Ansar Gallery, Al Karama",
+    "Dubai, United Arab Emirates",
+  ],
+  streetAddress:
+    "Office #13, Breeze Business Center, Al Hamsa Building (Office Tower), 3rd Floor, Office 307, Next to Ansar Gallery, Al Karama",
+  address:
+    "Office #13, Breeze Business Center, Al Hamsa Building (Office Tower), 3rd Floor, Office 307, Next to Ansar Gallery, Al Karama, Dubai, United Arab Emirates",
 };
 
 export const NAV_LINKS = [

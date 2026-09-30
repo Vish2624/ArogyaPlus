@@ -67,12 +67,12 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="container-page flex h-20 items-center justify-between gap-4">
+      <div className="container-page flex h-24 items-center justify-between gap-4">
         <Link
           to="/"
           className="flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
         >
-          <Logo className="h-12 w-auto" />
+          <Logo className="h-20 w-auto" />
         </Link>
 
         {scrolled ? (
